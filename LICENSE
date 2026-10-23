@@ -1,0 +1,1053 @@
+Skein
+Copyright (C) 23.10.2026 AIV. All rights reserved.
+
+License: ILL - Modular Lineage License, version 1.0 (adapted)
+SPDX-License-Identifier: LicenseRef-ILL-1.0
+
+ILL is a source-available license, NOT an "open source" license in the
+meaning of the Open Source Definition (OSI): it restricts use to
+non-commercial purposes, reserves commercial licensing to the
+rightsholder designated in the NOTICE file (Section 8), and requires
+preservation of the Authorship Chain (Section 4).
+
+ILL Files and Third-Party Components are licensed per-component
+(Section 2). The Authorship Chain, the Commercial Rightsholder
+designation and the list of Third-Party Components are recorded in
+the NOTICE file. Modules are recorded in the MODULES file. Contribution
+mechanics are in the CONTRIBUTING file.
+
+THE PRODUCT IS PROVIDED "AS IS", WITHOUT WARRANTIES OF ANY KIND.
+See Section 12 below.
+
+========================================================================
+FULL LICENSE TEXT
+========================================================================
+
+Document: ILL - Modular Lineage License (base license)
+Version: 1.0 (adapted edition, security-corrected 2026-10-21)
+Effective date: 2026-10-15
+SPDX-License-Identifier: LicenseRef-ILL-1.0
+
+Corrective revision of 2026-10-21 (corrective, not a new
+edition; Section 14.2 continues to apply):
+  F1 - 10.1: patent license narrowed to the uses permitted
+       by the License Stack (no sell/offer for sale absent
+       a Commercial Agreement);
+  F2 - 13.1, 13.3: automatic self-reinstatement removed;
+       reinstatement requires a written act of the
+       affected Author;
+  F3 - 1.8: contributions merged without a consent mark
+       are not ILL Files and are not licensed until the
+       chain entry is confirmed;
+  F4 - 1.11: presumption of Commercial Use narrowed;
+       express Safe Harbors added;
+  F5 - 1.7: API carve-out tightened; wrappers, hosts and
+       thin extensions qualify as Derivative Works;
+  F6 - 7.1(e), 7.5: source-offer binds commercial
+       licensees unless the Agreement provides otherwise;
+       network availability (SaaS/hosting) of Derivative
+       Works regulated;
+  F7 - 6.3(h), 6.7: Modules may not add field-of-use,
+       ethical-use or visible-attribution conditions;
+       mechanism for exclusion of burdensome Modules;
+  F8 - 8.3: test of "independent additions" strengthened,
+       burden of proof on the claiming Author;
+  F9 - 6.8: compliance may be verified at the level of the
+       root LICENSE/NOTICE/MODULES files; recipients
+       relying on them are protected from non-evident
+       discrepancies;
+  F10 - 15.2, 15.10: the Original Author may designate a
+       governing law and forum in the NOTICE/AUTHORS file;
+       interim and injunctive relief may be sought at any
+       time, including during the negotiation period;
+  F11 - 1.12: non-commercial hosting (free access, no
+       advertising, no promotion of commercial interests)
+       expressly confirmed as Non-Commercial Use;
+  F12 - SPDX identifier set to LicenseRef-ILL-1.0; Annex
+       example (8) aligned with the Safe Harbor of
+       1.11(c); 8.1 requires disclosure of non-waivable
+       statutory termination rights (14.3) to commercial
+       counterparties.
+
+================================================================
+PREAMBLE
+================================================================
+
+ILL is a source-available, modular license built around two
+ideas:
+
+(1) LINEAGE. The chain of authorship must remain clearly
+    traceable from the Original Author through every
+    Modification. Nobody may ever cut, obscure or rewrite
+    this chain.
+
+(2) MODULARITY. Every subsequent Author may extend the
+    license for that Author's own additions ("Modules"),
+    provided the extension does not contradict the base
+    License and does not contradict the Modules of the
+    previous Authors in the chain. The effective license of
+    any file is the License Stack: the base License plus all
+    accumulated Modules of the Authors in its chain.
+
+Non-Commercial Use is free. Commercial Use requires a
+separate written agreement with the rightsholder designated
+in the Authorship Chain.
+
+This License is written generically: it names no company,
+website or jurisdiction, and may be adopted by any Author
+for that Author's software. It is intended to be enforceable
+worldwide, in particular in the United States and in Europe,
+under local copyright and patent law.
+
+Everyone is permitted to copy and distribute verbatim copies
+of this License.
+
+----------------------------------------------------------------
+HOW TO APPLY
+----------------------------------------------------------------
+
+1. Keep this full text in the LICENSE file at the root of the
+   repository.
+2. Identify which files are ILL Files. Recommended per-file
+   header:
+       SPDX-License-Identifier: ILL-1.0
+       Copyright (C) 23.10.2026 AIV
+   and/or a per-component list in the NOTICE file. (If
+   your compliance tooling requires an SPDX-listed
+   identifier, use LicenseRef-ILL-1.0.)
+3. Start the Authorship Chain in the NOTICE file (or an
+   AUTHORS file) at the root: the Original Author, the date,
+   and a brief description of the work.
+4. Keep all Modules in a MODULES file at the root, one Module
+   per block, each referencing its Author's chain entry.
+5. Third-Party Components must be listed in the NOTICE file
+   with their own licenses; they are never covered by ILL.
+
+================================================================
+Section 1. DEFINITIONS
+================================================================
+
+1.1. ILL Files - all program modules, source and object code,
+documentation, configuration files, build scripts, graphical,
+audio and other resources that are placed under this License
+by their copyright holder and are identified as ILL Files in
+the per-component list of the distribution or in per-file or
+per-directory notices. Each ILL File indicates its Author.
+
+1.2. Author - the copyright holder who has placed ILL Files
+under this License. "Original Author" - the Author who first
+published the Product under ILL.
+
+1.3. Product - the ILL Files of an Author as published by
+that Author, including the ILL Files as incorporated in any
+Derivative Work. Third-Party Components are not part of the
+Product.
+
+1.4. Third-Party Components - components included in a
+Distribution under licenses other than ILL, identified as such
+in the per-component list in the NOTICE file.
+
+1.5. Distribution - making the Product and Third-Party
+Components available to the public or to third parties as one
+aggregate (one installation image, repository, package
+archive or storage medium), in any form and through any
+means, including over networks (download, streaming, hosted
+access). "Distribution" includes "making available to the
+public" and "communication to the public" within the meaning
+of applicable copyright law.
+
+1.6. Modification - any change, adaptation, translation,
+addition, deletion or other transformation of ILL Files or
+their parts resulting in a work based on them. "Modifying
+Author" - an Author who creates a Modification. The
+authorship of a Modification is claimed by the person or
+entity that directs and takes responsibility for the changes;
+the use of software tools, including AI-assisted tools, does
+not by itself create authorship.
+
+1.7. Derivative Work - a work that actually incorporates
+copyright-protected elements of ILL Files (source or object
+code, protected structure, sequence and organization of
+code, and other original non-textual elements) and that
+would, absent permission, infringe copyright.
+
+    A work that interacts with the ILL Files solely through
+documented public program interfaces (APIs), without copying
+protected code or structure, is not a Derivative Work only
+if ALL of the following conditions are met: (a) the
+interaction is not the work's primary functional purpose;
+(b) the work does not replace, reproduce or expose the
+functionality of the ILL Files to third parties, including
+as a hosted service, wrapper, shell, proxy, bridge,
+plugin or user interface whose principal value is access
+to the functionality of the Product; and (c) the work's
+value to its users does not derive predominantly from
+access to the functionality of the ILL Files. A work that
+merely wraps, hosts, re-brands, configures or thinly
+extends the ILL Files, or that makes the functionality of
+the ILL Files available to third parties by any technical
+means, is a Derivative Work regardless of the absence of
+copied code. Mere renaming, re-packaging, parameterization
+or change of delivery channel (including network delivery)
+of the ILL Files does not create an independent work. A
+fully independent implementation of the same functionality,
+created without access to the source code of the ILL Files,
+is likewise not a Derivative Work.
+
+1.8. Authorship Chain - the ordered, cumulative record of
+authorship of the Product and of every Modification of it,
+starting with the Original Author and continuing with every
+Modifying Author in order of modification. For each author
+the chain indicates: (a) the name or a stable pseudonym;
+(b) the date or release version of the contribution;
+(c) a brief indication of the changes made; and (d) at the
+author's option, contact details. The chain is kept in the
+NOTICE (or AUTHORS) file and/or in per-file headers
+customary for the medium. A Modifying Author is included in
+the chain upon a consent mark (CONTRIBUTING, section 3); a
+contribution merged without a consent mark is included only
+once the contributor has confirmed the chain entry, and
+until then the entry is marked "unconfirmed". An
+unconfirmed entry does not confer standing under clause
+4.7 until confirmed; the validity of the License Stack
+is not otherwise affected. A contribution merged
+without a consent mark is not an ILL File and is not
+licensed under this License or the License Stack until
+its chain entry is confirmed; until then it is excluded
+from the Product for the purposes of the grants in
+Sections 3 and 10 and must not be distributed as part of
+the Product. The Authors shall, upon discovery,
+promptly remove or replace unconfirmed contributions.
+
+1.9. Supplemental Terms ("Module") - additional license terms
+attached by an Author to the Product or to specifically
+identified parts of it in accordance with Section 6.
+
+1.10. License Stack - for any ILL File or Modification: this
+base License plus all Modules of the Authors in the
+Authorship Chain applicable to that file, attached in the
+order of the chain.
+
+1.11. Commercial Use - any use of the Product or a Derivative
+Work other than Non-Commercial Use, including but not limited
+to: use by legal entities, sole traders and government
+bodies; providing access over networks (SaaS, hosting, VDI)
+for remuneration or in the course of commercial activity;
+distribution, resale, embedding in equipment; use as a tool
+for providing commercial services; use by natural persons
+for providing services for remuneration regardless of
+entrepreneur status; and fundraising with the help of the
+Product (crowdfunding, donations solicited in connection
+with the Product); and use of the Product, including its
+source code, to train, fine-tune or evaluate
+machine-learning models in the course of commercial
+activity. Receiving advertising revenue in
+connection with demonstrations of the Product is Commercial
+Use.
+
+    A use is presumed Commercial where the Product is used:
+on the equipment of an organization, in its internal network
+or under its account, if the use forms part of the tasks or
+commercial interests of that organization; by a natural
+person for the purpose of obtaining profit or remuneration;
+by a natural person on equipment or infrastructure provided
+by an organization, if the use forms part of that person's
+assigned duties or of the tasks or commercial interests of
+that organization; or in the provision of services to third
+parties, including free-of-charge provision if it promotes
+other commercial interests (customer acquisition, advertising
+of commercial offers).
+
+    The following are not presumed Commercial ("Safe
+Harbors"; the User bears the burden of showing that a Safe
+Harbor applies): (a) personal, non-remunerated use by a
+natural person, including incidental use on equipment
+provided by an organization where such personal use is
+permitted by that organization's rules and does not form
+part of the person's assigned duties; (b) verbatim
+reproduction and redistribution of the Product without
+monetization, without advertising and without promotion of
+commercial interests, including mirrors, forks and package
+archives; (c) demonstration and review of the Product where
+any advertising revenue derives from the reviewer's platform
+as a whole and not specifically from the demonstration of
+the Product itself.
+
+1.12. Non-Commercial Use - use of the Product or a Derivative
+Work exclusively for personal, educational, research,
+civic/charitable and other purposes not aimed at obtaining
+profit or remuneration and not falling within the definition
+of Commercial Use. Without limiting the Safe Harbors of
+clause 1.11, hosting of the Product or of a Derivative Work
+with free access, without advertising and without promotion
+of commercial interests constitutes Non-Commercial Use
+(see Annex 1, example (14)).
+
+1.13. User - a natural or legal person exercising the rights
+granted by this License.
+
+1.14. Complete Corresponding Source Code - the complete
+source code of the ILL Files distributed in object code
+form, in the preferred form for making modifications,
+including all modules, interface definition files and
+scripts used to control compilation and installation of the
+object code, and the scripts controlling the Product's
+start, provided that such scripts are distributed as part of
+the Product. Source code of Third-Party Components is
+governed by their own licenses.
+
+1.15. Affiliate - an entity that controls, is controlled by,
+or is under common control with a person, where control
+means ownership of more than fifty per cent of voting rights
+or equity, or the power to direct the management and
+policies of an entity.
+
+1.16. Commercial Rightsholder - the Author, or the person or
+entity designated under clause 8.2, that is entitled to
+conclude Commercial Agreements for given ILL Files.
+
+================================================================
+Section 2. SCOPE: PER-COMPONENT APPLICATION
+================================================================
+
+2.1. This License applies exclusively to ILL Files and never
+applies to Third-Party Components. In particular:
+(a) each Third-Party Component remains licensed solely under
+    its own license, and the terms of that license are
+    unaffected by this License;
+(b) no provision of this License restricts, conditions,
+    narrows or revokes any right granted under the license of
+    a Third-Party Component; in particular, no field-of-use
+    restriction (including the prohibition of Commercial
+    Use) and no fee obligation under this License applies to
+    Third-Party Components, and nothing in this License is
+    construed as relicensing a Third-Party Component;
+(c) no party may state or imply that a Third-Party Component
+    is licensed under ILL, or that ILL Files are licensed
+    under the license of a Third-Party Component.
+
+2.2. Mere aggregation is permitted. Making a Distribution
+available (one installation image, repository, package
+archive or storage medium containing ILL Files together
+with Third-Party Components, including components under
+strong-copyleft licenses) is permitted, provided that each
+component remains an independent work identifiable per file
+or per package, and the license of each Third-Party
+Component is complied with (including source-code and
+notice obligations).
+
+2.3. Combining ILL Files with a strong-copyleft Third-Party
+Component through linking, inclusion in one program, or
+derivation is permitted only in a manner that does not,
+under the terms of that copyleft license, subject the ILL
+Files to the copyleft license. Where such a combination
+does, by operation of the copyleft license, extend to the
+combined work, the ILL Files included in that combination
+are, with respect to that combined work, additionally
+licensed under the copyleft license, and the terms of the
+copyleft license prevail to the extent of the conflict.
+
+2.4. Independent communication between the Product and a
+Third-Party Component through ordinary process boundaries,
+documented public APIs or standard system calls does not
+create a Derivative Work of that Third-Party Component and
+does not subject the Product to its license.
+
+================================================================
+Section 3. GRANT OF RIGHTS
+================================================================
+
+3.1. Non-Commercial grant. Each Author grants every User a
+non-exclusive, royalty-free, worldwide license for the entire
+term of copyright and of any similar exclusive rights
+(including sui generis database rights and neighboring
+rights) to use, modify, distribute and make available to the
+public that Author's ILL Files and Derivative Works thereof
+for Non-Commercial Use, on the terms of the License Stack
+applicable to each file.
+
+3.2. No commercial rights. Nothing in this License grants
+the right of Commercial Use. Commercial Use requires a
+written commercial license agreement ("Commercial
+Agreement") concluded with the Commercial Rightsholder
+designated for the relevant ILL Files in the Authorship
+Chain file, in accordance with Section 8.
+
+3.3. Direct rights. Rights under this License are granted to
+the User directly by each Author. This License does not
+limit rights the User holds under other licenses granted by
+the same Author.
+
+================================================================
+Section 4. AUTHORSHIP CHAIN
+================================================================
+
+4.1. Traceability - the core condition. The defining
+condition of this License is that the chain of authorship
+remains clearly traceable from the Original Author through
+every Modification. Every distributed copy of the Product or
+of a Derivative Work must preserve the complete Authorship
+Chain.
+
+4.2. Form and maintenance of the chain.
+(a) All copyright notices, this License, all applicable
+    Modules and the warranty disclaimer are retained in all
+    copies.
+(b) The central Authorship Chain file (NOTICE or AUTHORS,
+    at the root or per package) lists every Author in
+    order, with the date or release version of the
+    contribution and a brief description of the changes.
+(c) Every Modification, before it is distributed, adds the
+    Modifying Author's entry to the chain: name or stable
+    pseudonym, date or version, brief description of the
+    changes. Where per-file headers are customary in the
+    relevant community, the modified files' headers are
+    updated instead of or in addition to the central file.
+(d) All changes to the files are clearly indicated and
+    dated.
+
+4.3. No removal. No User may remove, alter, obscure or
+truncate any entry of the Authorship Chain or any copyright
+notice or license reference, whether in the original files
+or in any Modification. A change of naming or branding does
+not extinguish the chain: a new name is added on top of the
+chain, never in place of it. Corrections of a chain entry
+are made by an additional entry of the same Author
+referencing the corrected entry, never by rewriting it.
+
+4.4. Continued authorship. Each Author retains copyright in
+that Author's own contributions and may use them
+independently, provided they function without the ILL Files
+of the other Authors. Copyright in the Product as a whole is
+exercised in accordance with this License and the License
+Stack.
+
+4.5. Sanction. Removal or obscuring of Authorship Chain
+entries or of copyright notices is a material breach of
+this License and an infringement of the attribution rights
+of every Author in the chain. It entails termination under
+Section 13 and liability to each affected Author.
+
+4.6. Moral rights. To the extent moral rights (including
+droit moral and rights of attribution and integrity) cannot
+be waived or assigned under applicable law, each Author
+agrees not to assert them against Users who comply with the
+License Stack. Where attribution is legally required,
+attribution through the Authorship Chain is agreed to
+satisfy that requirement to the fullest extent permitted.
+
+4.7. Standing. Each Author may enforce this License with
+respect to that Author's own contributions and the
+integrity of the Authorship Chain as a whole. Authors are
+not obliged to enforce, and no Author is liable for another
+Author's decision not to enforce.
+
+4.8. Privacy of chain entries. Chain entries contain
+personal data only to the extent an Author chooses to
+identify with a real name or contact details; pseudonymous
+entries are the default. An Author may update or remove
+that Author's contact details at any time without altering
+the entry itself. Where mandatory data-protection law
+grants rights of rectification or erasure, an entry is
+corrected by a new entry (clause 4.3); where erasure is
+finally ordered under mandatory law, the entry is removed
+and its place in the order of the chain is recorded with
+the note "entry removed pursuant to a data-protection
+order", so that the order and completeness of the chain
+remain verifiable. A pseudonymous entry is not invalidated
+by the use of a pseudonym; the Author may prove authorship
+for enforcement purposes by any credible evidence.
+
+================================================================
+Section 5. MODIFICATIONS: LICENSE INHERITANCE
+================================================================
+
+5.1. Every Modification and every Derivative Work that
+incorporates ILL Files must, to the extent of that
+incorporation, be governed by this License - the same
+edition that governs the modified files (each file
+indicates its edition; where it does not, the edition
+referenced in the release documentation applies; where
+neither exists, the edition referenced in the LICENSE or
+NOTICE file distributed with the file applies; where none of
+these exists, the edition current at the date of the
+Modification applies) - together with the License Stack
+accumulated in the Authorship Chain. A single file must not
+combine content governed by different editions; where a file
+without edition indication is modified, the Modification
+states the edition applied.
+
+5.2. No author, distributor or recipient may relicense,
+sublicense or otherwise make ILL Files available under
+different terms, and no additional condition may be imposed
+that restricts exercise of the rights granted under this
+License. This clause does not apply to Third-Party
+Components, which remain under their own licenses.
+
+5.3. A Modification may be published and distributed
+independently, subject to compliance with Sections 4-8.
+Distribution under the License Stack is otherwise free of
+charge for Non-Commercial Use, subject to clause 7.2.
+
+================================================================
+Section 6. MODULARITY: SUPPLEMENTAL TERMS
+================================================================
+
+6.1. Right to extend. ILL is a modular license. Any Author
+may attach Supplemental Terms ("Module") to the Product or
+to specifically identified own additions. A Module takes
+effect when it is distributed together with the Authorship
+Chain entry of its Author.
+
+6.2. The License Stack. The effective license of any ILL
+File or Modification is the License Stack: this base License
+plus all Modules of the Authors in the chain applicable to
+that file, in the order the chain was formed. All recipients
+receive rights under the Stack.
+
+6.3. Validity conditions. A Module is valid only if all of
+the following are met:
+(a) it expressly acknowledges that the ILL Files remain
+    governed by this base License;
+(b) it does not contradict this base License, including its
+    Core Conditions (clause 6.4);
+(c) it does not contradict, cancel, condition or restrict
+    any Module of a previous Author in the chain: a later
+    Module may only add terms, never remove rights granted
+    by earlier Modules;
+(d) it clearly identifies its Author (through the chain
+    entry), the date of attachment and its scope - the
+    specific files or additions to which it applies;
+(e) it does not impose fees, royalties, account requirements
+    or technical restrictions on Non-Commercial use,
+    modification or distribution of the ILL Files
+    themselves, and it does not grant or purport to grant
+    Commercial Use rights: Commercial Use is available only
+    under a Commercial Agreement under Section 8;
+(f) it does not purport to relicense Third-Party
+    Components;
+(g) it does not require removal or obscuring of any
+    copyright notice, license text or Authorship Chain
+    entry;
+(h) it does not impose field-of-use, ethical-use,
+    visibility or attribution conditions on Non-Commercial
+    use beyond what this base License itself requires
+    (including any requirement of visible attribution in
+    user interfaces, outputs or works created with the
+    Product), and it does not require any technical or
+    legal measure that would make compliance with an
+    earlier Module or with the base License impossible.
+A Module that fails any condition is void to the extent of
+the conflict or impermissible restriction; the remainder of
+the License Stack remains in force.
+
+6.4. Core Conditions. No Module may contradict or weaken
+the following conditions of this License:
+(i)   preservation and completeness of the Authorship Chain
+      (Section 4);
+(ii)  the separation of Non-Commercial and Commercial Use
+      (Sections 3 and 8);
+(iii) license inheritance: every Modification carries this
+      License and the License Stack (Section 5);
+(iv)  per-component scope for Third-Party Components
+      (Section 2);
+(v)   the exclusion of warranties and the limitation of
+      liability (Section 12).
+
+6.5. Precedence. In case of conflict within a License Stack:
+the base License prevails over any Module; earlier Modules
+prevail over later Modules; and mandatory terms of
+applicable law or of the license of a Third-Party Component
+prevail over any term of the Stack to the extent of the
+conflict. The conflicting part of the later term is void;
+the remainder of the Stack applies.
+
+6.6. MODULES file. All Modules are collected in a MODULES
+file at the root of the repository (or per package, with a
+manifest at the root), one Module per block, each referencing
+its Author's chain entry. Every Distribution of the Product
+or of a Derivative Work must pass on the current MODULES
+file together with the copies. A Module not present in the
+MODULES file of a Distribution does not bind recipients of
+that Distribution, and a Module distributed without its
+Author's chain entry is void. A Module, once distributed,
+may not be withdrawn or amended; a correction is made by a
+new Module of the same Author referencing the earlier one
+(clause 4.3).
+
+6.7. Exclusion of burdensome Modules. The Original Author
+(or, failing that Author, the majority of the Authors
+recorded in the Authorship Chain) may mark a Module
+"excluded" in the central MODULES file, stating the reasons
+in a new entry referencing the excluded Module (clause 4.3).
+An excluded Module remains part of the historical record and
+its chain entry is preserved, but it does not propagate to
+Distributions made after the exclusion and does not bind
+recipients of those Distributions. The exclusion affects
+only the Module; the base License and all other Modules
+remain in force.
+
+6.8. Compliance at the level of root files. A recipient may
+rely on the LICENSE, NOTICE and MODULES files at the root of
+a Distribution as the complete statement of the License
+Stack for all ILL Files of that Distribution that bear no
+conflicting per-file notice. A recipient who complies with
+the License Stack as stated in those root files is not in
+breach by reason of a discrepancy that is not evident from
+the face of the files. This clause does not limit the
+precedence rules of clause 5.1 and clause 6.5 for the
+purpose of determining the actual content of the Stack.
+
+================================================================
+Section 7. DISTRIBUTION CONDITIONS
+================================================================
+
+7.1. Any lawful User may distribute the Product and
+Derivative Works free of charge for Non-Commercial Use,
+subject to mandatory compliance with:
+(a) retaining all copyright notices, the Authorship Chain,
+    this License, the NOTICE file, the MODULES file with
+    all applicable Modules and the warranty disclaimer in
+    all copies distributed - prominently in the documentation
+    or equivalent materials accompanying any object-code
+    distribution;
+(b) clearly indicating all changes made to the files, and
+    dating such changes;
+(c) adding the Modifying Author's entry to the Authorship
+    Chain for each Modification (clause 4.2(c));
+(d) not using the names, marks, logos or other designations
+    of the Authors as trademarks or branding without
+    permission, except for nominative references to the
+    original Product customary in the relevant community;
+(e) when distributing in object code form, making available
+    the Complete Corresponding Source Code of the ILL Files
+    and of the distributed Derivative Works - no later than
+    at the time of distribution of the object code, free of
+    charge (subject to clause 7.2), for a period of no less
+    than three years from the date of distribution, in the
+    preferred form for making modifications. This
+    obligation also binds commercial licensees, unless the
+    Commercial Agreement provides otherwise;
+(f) distributing under the terms of this License and the
+    License Stack, without additional restrictions;
+(g) in a Distribution containing Third-Party Components:
+    preserving per-component license identification (per
+    file or per package) and the license texts and copyright
+    notices of Third-Party Components, and complying with
+    the terms of each Third-Party Component's license;
+(h) not stating or implying that Third-Party Components are
+    licensed under ILL, or that ILL Files are licensed
+    under the license of a Third-Party Component.
+Requirements (a), (b), (c), (e) and (f) do not apply to
+Third-Party Components, which remain under their own
+licenses.
+
+7.2. No fee may be demanded from recipients for
+Non-Commercial distribution of the ILL Files, except
+reimbursement of no more than the reasonable cost of
+conveyance (media, shipping, provisioning of a download).
+
+7.3. No sublicensing. Downstream rights arise directly from
+each Author; sublicenses are not granted.
+
+7.4. Relicensing is prohibited. ILL Files may not be
+re-licensed, including under any "or later" clause.
+
+7.5. Network availability. Making a Derivative Work
+available over networks (SaaS, hosting, VDI, hosted
+access) is making available to the public under clause
+1.5. It is permitted under this License only where it
+constitutes Non-Commercial Use (clause 1.12); otherwise
+it requires a Commercial Agreement under Section 8.
+Clause 7.1(e) does not oblige a service provider to
+convey source code to users who receive only network
+access and no copy of object code; however, any
+Distribution of object code of the Product or of a
+Derivative Work triggers clause 7.1(e) in full, and a
+Commercial Agreement may extend or limit the source-code
+obligations of the parties to it.
+
+================================================================
+Section 8. COMMERCIAL USE
+================================================================
+
+8.1. Requirement. Commercial Use of the Product or of a
+Derivative Work requires a Commercial Agreement in writing
+(including electronic form) concluded with the Commercial
+Rightsholder designated for the relevant ILL Files in the
+Authorship Chain file. The negotiation, scope and
+remuneration of the Commercial Agreement are outside this
+License. Before concluding a Commercial Agreement, the
+Commercial Rightsholder shall inform the counterparty of
+any statutory rights of termination of grants that cannot
+be waived or excluded under applicable law (clause 14.3).
+
+8.2. Designation of the Commercial Rightsholder. For that
+Author's own ILL Files, an Author may designate a different
+Commercial Rightsholder (including a later Modifying Author
+or a third party) in the central Authorship Chain file
+(NOTICE or AUTHORS) or in a Module. A designation covering
+the ILL Files of another Author is valid only if made in
+the central Authorship Chain file and confirmed by that
+Author in writing. In the absence of a valid designation,
+the Author is the Commercial Rightsholder of that Author's
+ILL Files.
+
+8.3. No revenue rights in ILL Files of other Authors.
+Except for a separate charge for an Author's own original
+additions that functionally work without the ILL Files and
+without access to the Product or to its functionality in
+any form (including via APIs, hosted instances, services
+or data derived from the Product), no Modifying Author or
+downstream distributor may demand or receive payment for
+Commercial Use, distribution or network access to ILL
+Files of other Authors or to Derivative Works insofar as
+they incorporate them. Where the practical use or market
+value of the additions depends on the Product or its
+functionality, the additions are presumed not to be
+independent, and the Author claiming independence bears
+the burden of proof. Payments associated with Commercial
+Use of ILL Files are governed by the Commercial Agreement
+with the respective Commercial Rightsholder.
+
+================================================================
+Section 9. NAMES, MARKS AND BRANDING
+================================================================
+
+9.1. This License does not grant the right to use the
+trademarks, service marks, logos, trade names or commercial
+designations of the Authors.
+
+9.2. A Derivative Work must bear a name clearly distinct
+from the Product's name and a prominent notice:
+    "New name" based on "Product name"
+(with the actual names filled in, e.g., AcmeOS Edu based on
+AcmeOS), with the Authorship Chain preserved beneath this
+notice.
+
+9.3. A Derivative Work must not be presented as an official
+product of the Authors or as endorsed by them.
+
+================================================================
+Section 10. PATENTS
+================================================================
+
+10.1. Each Author grants the User a non-exclusive,
+worldwide, royalty-free patent license under patents
+owned or controlled by that Author or its affiliates,
+to make, have made, use and import that Author's ILL
+Files, solely to the extent necessary to exercise the
+rights granted by the License Stack and only for uses
+permitted under the License Stack (Non-Commercial Use,
+or Commercial Use under a valid Commercial Agreement).
+This patent license does not extend to selling, offering
+for sale, or any other act of Commercial Use not covered
+by a Commercial Agreement.
+
+10.2. Patent retaliation. If the User or its affiliate
+initiates, or knowingly funds or directs, any judicial or
+administrative proceeding ("Patent Assertion") asserting
+that the Product or any Derivative Work infringes patent
+rights, all licenses and rights granted to the User under
+this License terminate automatically as of the filing date
+of the Patent Assertion, provided it relates to the
+functionality of the Product or the Derivative Work.
+Termination under this clause applies only to the User on
+whose behalf or under whose control the Patent Assertion is
+made, and does not affect licenses and rights of other
+recipients. The exception is a Patent Assertion filed
+solely in response to a proceeding previously initiated by
+an Author concerning patent infringement. Termination under
+this clause does not affect the licenses of Third-Party
+Components under their own terms, does not revoke any
+license granted by the User to other recipients, and does
+not apply to the extent its application would conflict with
+mandatory provisions of the license of a Third-Party
+Component.
+
+================================================================
+Section 11. PROHIBITED ACTIONS
+================================================================
+
+11.1. The User may not:
+(a) use the Product or Derivative Works for Commercial Use
+    without a Commercial Agreement;
+(b) circumvent technical means of license verification,
+    including by modifying their operation, intercepting or
+    substituting data, or using forged license files;
+(c) remove or alter copyright notices, license references
+    or Authorship Chain entries;
+(d) distribute the Product or Derivative Works under terms
+    other than the License Stack;
+(e) impose any technical measure (including encryption,
+    authentication keys, digital rights management or
+    trusted-platform mechanisms) that restricts the ability
+    of a recipient of a lawfully obtained copy to exercise
+    the rights granted under the License Stack; this does
+    not prohibit technical measures whose keys or means of
+    access are conveyed to the recipients together with the
+    copy;
+(f) use the Product for unlawful purposes or in violation
+    of applicable law.
+
+11.2. Circumvention of technical means of license
+verification, Commercial Use without a Commercial
+Agreement, imposition of restricting technical measures,
+and removal of Authorship Chain entries or copyright
+notices are material breaches of this License.
+
+    Any use of the Product or a Derivative Work outside the
+License Stack is an infringement of the copyright, patent
+and similar rights of the affected Authors.
+
+================================================================
+Section 12. NO WARRANTIES AND LIMITATION OF LIABILITY
+================================================================
+
+12.1. THE PRODUCT IS PROVIDED "AS IS", WITHOUT WARRANTIES,
+EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NON-INFRINGEMENT. The foregoing disclaimer in capital
+letters is intended to be conspicuous within the meaning of
+the Uniform Commercial Code and equivalent rules.
+
+12.2. THE AUTHORS SHALL NOT BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL DAMAGES OR
+LOST PROFITS ARISING FROM USE OF OR INABILITY TO USE THE
+PRODUCT, EVEN IF AN AUTHOR HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES, TO THE MAXIMUM EXTENT
+PERMITTED BY APPLICABLE LAW. The limitations of this clause
+do not apply to damage caused intentionally or by gross
+negligence.
+
+12.3. Some jurisdictions do not allow the exclusion of
+implied warranties or limitation of liability. In such case
+the above limitations apply to the minimum extent permitted
+by the mandatory rules of the relevant jurisdiction.
+
+12.4. No obligation. The Authors are not obliged to provide
+updates, new releases, support, maintenance, hosting or
+continued availability of the Product or of any source-code
+offer.
+
+================================================================
+Section 13. TERMINATION
+================================================================
+
+13.1. Upon a material breach by the User (Section 11.2),
+the rights granted to the User under this License are
+suspended automatically as of the breach. The rights
+terminate: (a) immediately, in the cases listed in clause
+13.2; (b) in any other case of material breach, at the end
+of a 30-day cure period running from written notice from an
+affected Author, if the breach is not cured within that
+period, or upon written notice of termination from an
+affected Author where the breach persists. Mere cessation
+of the violating conduct does not by itself terminate the
+suspension or restore the rights; reinstatement requires
+the affirmative act described in clause 13.3.
+
+13.2. Termination is immediate, without a cure period, in
+case of circumvention of technical means of license
+verification, imposition of restricting technical measures
+under clause 11.1(e), or removal or alteration of
+Authorship Chain entries or copyright notices.
+
+13.3. Reinstatement. If the User ceases all violation of
+this License, the rights granted to that User are
+reinstated only upon written confirmation from an affected
+Author; no reinstatement occurs automatically, and the
+rights remain terminated or suspended until reinstated in
+writing. In the cases of clause 13.2, reinstatement is at
+the sole discretion of the affected Author(s) and
+additionally requires restoration of the affected notices,
+chain entries and unrestricted copies insofar as they remain
+within the User's reasonable control.
+
+13.4. Termination of one User does not affect rights of
+other recipients who obtained the Product or a Derivative
+Work in compliance with this License, nor the licenses of
+Third-Party Components under their own terms.
+
+13.5. No failure or delay by an Author in enforcing this
+License constitutes a waiver of any right under it.
+
+13.6. Sections 4, 12 and 15 survive termination, as well as
+any provisions that by their nature must survive.
+
+13.7. Termination does not affect source-code offers already
+made under clause 7.1(e), nor the rights of recipients under
+clause 13.4.
+
+================================================================
+Section 14. EDITIONS AND VERSIONS
+================================================================
+
+14.1. New editions of this License are published by the
+Original Author and take effect upon publication. Each
+edition indicates its version number and effective date.
+
+14.2. A Product release is governed by the edition of this
+License referenced in its release documentation; if the
+release documentation does not reference an edition, the
+edition current at the date of the release applies. The
+terms of the applicable edition continue to apply to that
+release even if a new edition is published; new editions
+never retroactively change the terms applicable to releases
+already made. Modules attached under a given edition remain
+subject to that edition's validity conditions regardless of
+later editions.
+
+14.3. Statutory termination. To the extent applicable law
+grants an Author an inalienable right to terminate a grant
+of rights (for example 17 U.S.C. Section 203), that right is
+not waived and cannot be excluded by this License. A
+statutory termination by one Author affects only the grants
+made by that Author; it does not terminate the grants of
+other Authors, does not affect rights in copies and
+Derivative Works lawfully obtained before the statutory
+termination took effect, and does not prevent the continued
+exercise of rights in Derivative Works prepared before the
+termination as permitted by applicable law.
+
+================================================================
+Section 15. FINAL PROVISIONS
+================================================================
+
+15.1. This License is a grant of rights under copyright,
+patent and similar exclusive rights law (including sui
+generis database rights), conditioned on compliance with its
+terms; it is not an assignment of copyright. To the extent a
+jurisdiction treats it as a contract, it is interpreted so
+as to preserve the maximum effect of its terms, and the
+consideration for each grant is the grant of the same
+rights to the granting Author's own contributions under this
+License.
+
+15.2. Copyright and related rights are territorial:
+protection is governed by the law of the country where
+protection is sought (Berne principle). By default this
+License selects no governing law and no exclusive forum
+beyond the competent courts under applicable law, in order
+to remain adoptable and enforceable worldwide. The Original
+Author may, however, designate in the central Authorship
+Chain file (NOTICE or AUTHORS) a governing law and a forum
+for disputes arising out of this License; such designation
+binds Users who obtain the Product after the designation was
+recorded, to the maximum extent permitted by mandatory law.
+
+15.3. All mandatory consumer rights and other
+non-excludable provisions of the law of the User's
+jurisdiction (in particular in the United States and in the
+European Union and its member states) are preserved.
+
+15.4. This License constitutes the entire agreement between
+the parties with respect to its subject matter and
+supersedes all prior arrangements concerning it.
+
+15.5. If any provision of this License is held invalid, the
+remaining provisions retain full force.
+
+15.6. Notices are sent in writing (including e-mail) to the
+contact details stated in the Authorship Chain file.
+
+15.7. The authoritative text of this License is the English
+version. Translations into other languages are for reference
+only.
+
+15.8. Acceptance.
+(a) Where the Product is provided with an interactive
+    license screen, acceptance is confirmed exclusively by
+    an explicit acceptance action (checking the box,
+    --accept-license or equivalent). Installation and use
+    without the acceptance action are prohibited.
+(b) Where the Product is obtained without an interactive
+    license screen (repository cloning, archive download,
+    copy from a third party, or any other means), this
+    License is deemed accepted upon first actual use of the
+    ILL Files (copying, modification, building, running).
+    The full text of this License must be placed in the
+    LICENSE file at the root of the repository, and every
+    party further distributing the Product must preserve
+    and pass on the full license text together with the
+    copy.
+
+15.9. This License does not create a partnership, joint
+venture, employment or agency relationship between the
+Authors and the Users.
+
+15.10. Disputes. The parties shall attempt to resolve any
+dispute arising out of this License by negotiation: a
+written claim is answered within 30 calendar days. Failing
+settlement, the dispute is submitted to the competent court
+under the applicable law (clause 15.2). All mandatory
+rights of a natural person acting for consumer purposes
+under the law of that person's habitual residence are
+preserved. Nothing in this clause prevents a party from
+seeking interim, provisional or injunctive relief from a
+competent court where necessary to preserve the Authorship
+Chain or the rights granted under this License. Such relief
+may be sought at any time, including before or during the
+negotiation period, and is not limited to the preservation
+of the Authorship Chain but extends to the prevention of
+Commercial Use without a Commercial Agreement and of the
+removal or alteration of copyright notices or Authorship
+Chain entries.
+
+15.11. Successors and assigns. This License binds and
+benefits the Authors' successors and assigns. A person who
+acquires copyright in ILL Files stands in the Authorship
+Chain in place of the transferring Author for the purposes
+of this License.
+
+15.12. Interpretation. This License is interpreted so as to
+preserve, to the greatest extent permitted: (a) the
+completeness and traceability of the Authorship Chain; (b)
+the separation of Non-Commercial and Commercial Use; (c)
+the validity and enforceability of the License Stack; and
+(d) the rights of recipients who comply with it. Ambiguities
+are not resolved against an Author on the sole ground that
+the Author drafted this License.
+
+================================================================
+Annex 1. EXAMPLES OF COMMERCIAL AND NON-COMMERCIAL USE
+================================================================
+
+(Illustration of clauses 1.11 and 1.12; in case of
+discrepancy the text of clauses 1.11 and 1.12 prevails.)
+
+(1) installation of the Product in a company for internal
+    office tasks: Commercial;
+(2) use of the Product by a freelancer (natural person) in
+    paid client work: Commercial;
+(3) writing a review with a demonstration of the Product
+    without advertising and without remuneration from the
+    manufacturer: NC;
+(4) educational process in a state school: NC;
+(5) use in a university research laboratory, including
+    funded research, if the Product is not used for
+    providing services to third parties and the results do
+    not contain the Product itself: NC;
+(6) use in a non-profit for internal tasks: NC;
+(7) use in a non-profit in providing services to third
+    parties, including for free if it promotes other
+    commercial interests: Commercial;
+(8) demonstration of the Product with advertising
+    monetization of the demonstration itself (blog, video
+    hosting): Commercial; demonstrations covered by the Safe
+    Harbor of clause 1.11(c) remain Non-Commercial;
+(9) use in a state body for performing its public
+    functions: Commercial;
+(10) use of the Product at home for personal purposes
+     without remuneration: NC;
+(11) paid technical support to end users of the Product
+     itself: Commercial;
+(12) development of Modifications and their transfer to the
+     Authors without subsequent distribution: NC;
+(13) publication of a Derivative Work without monetization:
+     NC;
+(14) non-commercial hosting of the Product or a Derivative
+     Work, with free access and without advertising or
+     promotion of commercial interests: NC;
+(15) embedding the Product in a crowdfunding campaign or a
+     paid course: Commercial.

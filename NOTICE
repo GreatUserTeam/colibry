@@ -1,0 +1,100 @@
+Skein
+Copyright (C) 10.23.2026 AIV. All rights reserved.
+
+License: ILL - Modular Lineage License, version 1.0 (adapted)
+SPDX-License-Identifier: LicenseRef-ILL-1.0
+
+This file records the Authorship Chain, the Commercial
+Rightsholder designation and the list of Third-Party
+Components, as required by ILL-1.0 (Sections 1.8, 1.16, 2
+and 8.2 of the LICENSE file).
+
+================================================================
+1. AUTHORSHIP CHAIN (ILL Section 4)
+================================================================
+
+The chain is ordered and cumulative. It must never be
+shortened, reordered or rewritten; corrections are made by
+additional entries referencing the corrected ones (ILL 4.3).
+
+----------------------------------------------------------------
+Chain entry 1 - Original Author
+----------------------------------------------------------------
+- Author:        AIV
+- Date/Version:  10.23.2026 / 0.0.1
+- Changes:       Initial release of Skein:
+                 A security-first NixOS-based
+                 Linux distribution (codename "Spark") with a
+                 graphical out-of-box-experience installer,
+                 Plymouth boot theme, btrfs/LUKS2-based
+                 installation flow and a curated desktop
+                 application set.
+- Contact:       info@gusteam.net / skein.gusteam.net
+
+----------------------------------------------------------------
+Chain entry N - AIV
+----------------------------------------------------------------
+- Author:        AIV
+- Date/Version:  10.23.2026 / 0.0.1
+- Changes:       Installer bring-up: silent UEFI boot image
+                 (iso/efi-image.nix, iso/oobe-files.nix); OOBE wizard
+                 split into session/terminal/widget libraries
+                 (scripts/spark-oobe*.sh) with SIGWINCH-correct rendering
+                 and human-readable locale selection; ISO build/test
+                 tooling (build.sh, run.sh) with self-describing serial
+                 logs; kernel-module packaging fix in modules/packages.nix.
+- Status:        confirmed | unconfirmed (ILL 1.8)
+- Contact:       info@gusteam.net / skein.gusteam.net
+
+================================================================
+2. COMMERCIAL RIGHTSHOLDER (ILL Section 8.2)
+================================================================
+
+For ALL ILL Files of this Product, unless a more specific
+designation is listed below, the Commercial Rightsholder is:
+
+    AIV
+
+Contact for Commercial Agreements: info@gusteam.net / skein.gusteam.net
+
+Component-specific designations (if any):
+
+    none
+
+(Per ILL 8.2, a designation covering another Author's ILL
+Files is valid only if recorded here AND confirmed by that
+Author in writing.)
+
+================================================================
+3. THIRD-PARTY COMPONENTS (ILL Sections 1.4 and 2)
+================================================================
+
+The following components are Third-Party Components. They
+are NOT licensed under ILL, remain under their own licenses,
+and the ILL terms - including the Non-Commercial Use
+restriction and the fee prohibition - do not apply to them.
+
+| Component | Version | License | Location|
+|-----------|---------|---------|---------|
+| NixOS / nixpkgs      | 26.11.20261020.02c087f (pin)   | MIT                 | flake input               |
+| Linux kernel (zen)   | 7.2.11                         | GPL-2.0-only        | modules/packages.nix      |
+| systemd              | 262                            | LGPL-2.1-or-later   | via nixpkgs               |
+| GRUB                 | 2.14                           | GPL-3.0-or-later    | iso/efi-image.nix         |
+| nixpak               | pinned revision (flake.lock)   | MIT                 | flake input               |
+| nix-software-center  | 0.1.2                          | GPL-3.0-or-later    | flake input               |
+| Helium browser       | 0.19.4.1                       | BSD-3-Clause        | flake input (helium)      |
+| ConvertX             | 0.10.0                         | AGPL-3.0-only       | modules/packages.nix      |
+| Plymouth             | (via nixpkgs)                  | GPL-2.0-or-later    | modules/plymouth.nix      |
+
+================================================================
+4. OTHER NOTICES
+================================================================
+
+- Trademarks: "Skein" are product names and marks of AIV;
+  they are not licensed by ILL (Section 9).
+- Official repository: https://github.com/aiv-tmc/skein (see CONTRIBUTING)
+- Modules (Supplemental Terms): see the MODULES file at the
+  repository root; a Module not listed there does not bind
+  recipients of a Distribution (ILL 6.6).
+
+Questions: info@Supplemental.net.

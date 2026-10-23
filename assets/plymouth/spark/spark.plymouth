@@ -1,0 +1,12 @@
+[Plymouth Theme]
+Name=spark
+Description=Spark boot splash
+ModuleName=script
+
+[script]
+# ImageDir and ScriptFile contain the @themeDir@ placeholder; the theme
+# derivation substitutes its own output path in, so the descriptor always
+# names a path that exists both in the Nix store of the running system and
+# in the initrd after the NixOS Plymouth module rewrites store paths.
+ImageDir=@themeDir@
+ScriptFile=@themeDir@/spark.script

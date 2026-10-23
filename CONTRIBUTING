@@ -1,0 +1,127 @@
+# Contributing to Skein
+
+This file designates the official repository and states the
+submission mechanics referenced in ILL (Sections 4 and 5 of
+the LICENSE file, ILL-1.0).
+
+================================================================
+1. OFFICIAL REPOSITORY
+================================================================
+
+The official Product repository is:
+
+    https://github.com/aiv-tmc/skein
+
+Pull requests to this repository are Submitted Modifications.
+If several repositories are designated as official for the
+current Product release, a pull request to any of them
+suffices; the list of official repositories is kept up to
+date in this file.
+
+Public publication of a Modification in your own repository,
+without a pull request to the official repository or an
+explicit consent mark, does not trigger the grants described
+in section 2.
+
+================================================================
+2. WHAT YOU GRANT BY SUBMITTING
+================================================================
+
+By giving a consent mark (section 3) for a Modification, you
+grant the Authors the following, with respect to that
+Submitted Modification:
+
+(a) a gratuitous (royalty-free), irrevocable, worldwide,
+    non-exclusive license for the entire term of copyright,
+    with the right to sublicense, to use, reproduce, modify,
+    distribute, make publicly available and commercially
+    license the Submitted Modification as part of the ILL
+    Files, the Product and any Derivative Works, in any
+    manner and for any purpose, including commercial
+    purposes;
+(b) a gratuitous, irrevocable, worldwide, non-exclusive
+    patent license under your patents, to the extent
+    necessary to use the Submitted Modification as part of
+    the Product and its Derivative Works;
+(c) the assurance that moral rights will not be asserted to
+    the maximum extent permitted by applicable law;
+(d) you retain copyright in original code you created and
+    may use it independently, provided such code
+    functionally works without the ILL Files.
+
+Note on the grant in section 2: it is intentionally broader
+than a typical DCO sign-off - it is irrevocable, includes
+the right to sublicense and to commercially license your
+contribution, and it survives your withdrawal from the
+project. Do not give the consent mark if you do not accept
+this.
+
+================================================================
+3. HOW TO SUBMIT (CONSENT MARK)
+================================================================
+
+Small contributions (500 lines of code or fewer):
+    - sign off the commit with the Developer Certificate of
+      Origin 1.1 (developercertificate.org), e.g.:
+          Signed-off-by: Your Name <e-mail>
+      The sign-off certifies that you have the right to
+      submit the contribution and constitutes the consent
+      mark, in lieu of the consent checkbox.
+
+Large contributions (more than 500 lines of code):
+    - additionally sign the contributor license agreement in
+      the form published by the Authors (if any), and attach
+      it to the pull request.
+
+Repository interface:
+    - on your first submission a separate consent checkbox
+      is shown; checking it is an explicit consent mark.
+      Using the checkbox or a DCO sign-off - one of the two -
+      is mandatory for every contribution.
+
+================================================================
+4. AUTHORSHIP CHAIN
+================================================================
+
+Every accepted contribution is added to the Authorship Chain
+(AUTHORS/NOTICE file and, where customary, per-file
+headers): your name or stable pseudonym, the date or
+version, and a brief description of the changes. The chain
+is never shortened or rewritten; see Section 4 of the
+License.
+
+================================================================
+5. PRACTICAL RULES
+================================================================
+
+- Base your work on the current release branch; keep pull
+  requests focused and reviewable.
+- Do not remove copyright notices, license references or
+  chain entries (ILL Sections 4 and 11).
+- Modifications must inherit the License Stack: the ILL
+  base license plus all Modules of previous Authors (ILL
+  Sections 5 and 6).
+- You may attach a Module (Supplemental Terms) only to your
+  own original additions and only in accordance with ILL
+  Section 6; it must not contradict the base License or any
+  previous Module, must not grant commercial rights, and
+  must not impose fees for Non-Commercial use.
+- Keep Third-Party Components under their own licenses; do
+  not link or combine them with the ILL Files in a way that
+  would subject the ILL Files to copyleft (ILL Section 2).
+- Contributions containing third-party code must identify it
+  and state its license in the pull request description.
+- Automated checks (security, style, license headers, chain
+  completeness) run on every pull request.
+
+Questions: the contact stated in the AUTHORS file.
+
+================================================================
+6. UNCONFIRMED CONTRIBUTIONS (ILL Section 1.8)
+================================================================
+
+A contribution merged without a consent mark is not an
+ILL File and is not licensed under ILL until its chain
+entry is confirmed. Maintainers must mark such entries
+"unconfirmed" and must not include such code in a
+release Distribution until confirmed.
