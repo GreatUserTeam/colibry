@@ -7,6 +7,12 @@
 # on /dev/tty before sourcing this file, so frames never mix into the
 # stdout/stderr traces that travel to the journal.
 
+# The wizard runs under an explicit UTF-8 locale: the keyboard decoder
+# then receives whole characters (a Cyrillic key press arrives as one
+# key, not as a burst of bytes), and case-insensitive matching in the
+# lists folds Cyrillic letters the same way it folds ASCII.
+export LC_ALL=C.UTF-8
+
 # --- window change handling -------------------------------------------------------------------
 
 # WINCH: the kernel sends SIGWINCH whenever the console geometry settles
@@ -16,6 +22,17 @@
 # trap only records the event; the widgets redraw when they observe it.
 WINCH=0
 trap 'WINCH=1' WINCH
+
+# tty_raw: (re)apply the input mode the key decoder depends on. Systemd's
+# virtual-console setup re-runs during the session whenever the console
+# state changes and resets the terminal to canonical echo mode as a side
+# effect: keystrokes would echo at the bottom of the screen, wrap at the
+# right edge and reach the wizard only on Enter. Re-applying the mode on
+# every idle tick makes the input state self-healing against any such
+# reset, from vconsole-setup or anything else.
+tty_raw() {
+  stty -echo -icanon min 1 time 0 < /dev/tty 2>/dev/null || true
+}
 
 # --- palette ----------------------------------------------------------------------------------
 
@@ -129,16 +146,18 @@ frame() {
 # --- keyboard -----------------------------------------------------------------------------------
 
 # read_key: one logical key into the global KEY. Printable keys arrive
-# as the single character; the rest as names (ENTER, ESC, UP, DOWN,
-# PGUP, PGDN, BACKSPACE, CTRL_U, CTRL_LEFT, CTRL_RIGHT). Escape sequences
-# are decoded with a short timeout, so a bare ESC key is
-# distinguishable from an arrow prefix. When no key arrives within a
-# polling interval, KEY is __TICK so widgets can service pending
-# window changes without waiting for input; a vanished terminal also
-# surfaces as ticks, which the widgets simply idle through.
+# as the single character (whole UTF-8 characters under the locale set
+# above); the rest as names (ENTER, ESC, UP, DOWN, PGUP, PGDN,
+# BACKSPACE, CTRL_U, CTRL_LEFT, CTRL_RIGHT). Escape sequences are decoded
+# with a short timeout, so a bare ESC key is distinguishable from an
+# arrow prefix. When no key arrives within a polling interval, KEY is
+# __TICK: the widgets service pending window changes there and the raw
+# terminal mode is re-applied, which heals any outside reset of the
+# input mode between keystrokes.
 read_key() {
   local k seq
   if ! IFS= read -rsn1 -t 0.4 k < /dev/tty; then
+    tty_raw
     KEY=__TICK
     return 0
   fi

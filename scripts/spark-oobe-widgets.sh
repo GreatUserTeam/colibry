@@ -7,8 +7,9 @@
 # changes (SIGWINCH), so an idle wizard never touches the terminal.
 
 # pick_list STEP TITLE HINT ITEMS_NAMEREF: a scrollable, filterable list
-# widget. Typing filters the items (substring match), the arrows move
-# the cursor, PgUp/PgDn page, Enter confirms, Ctrl+U clears the filter,
+# widget. Typing filters the items (substring match, case-insensitive,
+# Cyrillic-aware under the UTF-8 locale), the arrows move the cursor,
+# PgUp/PgDn page, Enter confirms, Ctrl+U clears the filter,
 # Ctrl+Left/Right request step navigation and the picked value is stored
 # in the global PICK. With an empty match set the frame shows a "no
 # matches" line and confirmation is disabled. The item array arrives by
@@ -86,7 +87,9 @@ pick_list() {
       CTRL_RIGHT) NAV=fwd; PICK=''; return 1 ;;
       ESC) PICK=''; return 1 ;;
       *)
-        if [ "${#KEY}" -eq 1 ]; then filter+=$KEY; cursor=0; offset=0; render; fi ;;
+        # Any other key is a printable character (whole characters under
+        # the UTF-8 locale, so this branch also covers Cyrillic input).
+        filter+=$KEY; cursor=0; offset=0; render ;;
     esac
   done
 }
@@ -95,11 +98,11 @@ pick_list() {
 # the hint row of the frame. MODE "text" echoes the value, MODE "pw"
 # echoes one bullet per character plus a length counter. Backspace edits
 # inside the field, Ctrl+U clears it, Enter confirms, Ctrl+Left/Right
-# requests step navigation, and only single printable bytes are accepted,
-# so multibyte sequences can never corrupt the field. The field line
-# alone is repainted as the value changes; the full frame is repainted
-# only when the window geometry changes. The final value is stored in
-# the global FIELD; the function returns 1 (with NAV set) on navigation.
+# requests step navigation; every other key appends its (whole,
+# possibly multibyte) character to the value. The field line alone is
+# repainted as the value changes; the full frame is repainted only when
+# the window geometry changes. The final value is stored in the global
+# FIELD; the function returns 1 (with NAV set) on navigation.
 input_field() {
   local step=$1 title=$2 label=$3 mode=$4 v=${5:-} hint=${6:-}
   local n i
@@ -136,8 +139,7 @@ input_field() {
       CTRL_LEFT) NAV=back; printf >&3 '\n'; return 1 ;;
       CTRL_RIGHT) NAV=fwd; printf >&3 '\n'; return 1 ;;
       ESC) : ;;
-      *)
-        if [ "${#KEY}" -eq 1 ]; then v+=$KEY; line; fi ;;
+      *) v+=$KEY; line ;;
     esac
   done
 }

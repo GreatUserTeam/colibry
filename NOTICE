@@ -1,5 +1,5 @@
 Skein
-Copyright (C) 10.23.2026 AIV. All rights reserved.
+Copyright (C) 10.23.2026 GUS-Team. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -20,7 +20,7 @@ additional entries referencing the corrected ones (ILL 4.3).
 ----------------------------------------------------------------
 Chain entry 1 - Original Author
 ----------------------------------------------------------------
-- Author:        AIV
+- Author:        GUS-Team
 - Date/Version:  10.23.2026 / 0.0.1
 - Changes:       Initial release of Skein:
                  A security-first NixOS-based
@@ -32,9 +32,9 @@ Chain entry 1 - Original Author
 - Contact:       info@gusteam.net / skein.gusteam.net
 
 ----------------------------------------------------------------
-Chain entry N - AIV
+Chain entry N - GUS-Team
 ----------------------------------------------------------------
-- Author:        AIV
+- Author:        GUS-Team
 - Date/Version:  10.23.2026 / 0.0.1
 - Changes:       Installer bring-up: silent UEFI boot image
                  (iso/efi-image.nix, iso/oobe-files.nix); OOBE wizard
@@ -53,7 +53,7 @@ Chain entry N - AIV
 For ALL ILL Files of this Product, unless a more specific
 designation is listed below, the Commercial Rightsholder is:
 
-    AIV
+    GUS-Team
 
 Contact for Commercial Agreements: info@gusteam.net / skein.gusteam.net
 
@@ -90,7 +90,7 @@ restriction and the fee prohibition - do not apply to them.
 4. OTHER NOTICES
 ================================================================
 
-- Trademarks: "Skein" are product names and marks of AIV;
+- Trademarks: "Skein" are product names and marks of GUS-Team;
   they are not licensed by ILL (Section 9).
 - Official repository: https://github.com/aiv-tmc/skein (see CONTRIBUTING)
 - Modules (Supplemental Terms): see the MODULES file at the

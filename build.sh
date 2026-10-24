@@ -27,6 +27,22 @@ ISO_LINK=result
 # instead of dying with a full disk halfway through.
 MIN_FREE_GB=40
 
+# Preflight: every wizard and installer script must parse before any nix
+# work starts. A script corrupted in transfer would otherwise surface its
+# syntax error only inside the virtual machine, half an hour after the
+# build began; here the same failure takes milliseconds and names the file.
+for script in \
+    scripts/spark-oobe.sh \
+    scripts/spark-oobe-term.sh \
+    scripts/spark-oobe-widgets.sh \
+    scripts/install-to-disk.sh; do
+  if [ -f "$script" ] && ! bash -n "$script" 2>/dev/null; then
+    echo "error: $script does not parse; the file is corrupted - replace it with a fresh copy." >&2
+    bash -n "$script" 2>&1 | head -n 3 >&2
+    exit 1
+  fi
+done
+
 # Free gigabytes on the file system that holds /nix (portable: plain df
 # in 1K blocks, no GNU-only flags).
 free_gb() {

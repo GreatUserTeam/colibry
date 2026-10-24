@@ -267,20 +267,14 @@ step_users() {
 }
 
 step_disk() {
-  local -a lines=() acts=()
+  local -a lines=()
   local dev size rm model
   while read -r dev size rm model; do
     lines+=("$(printf '%-12s %8s  %s' "$dev" "$size" "$model")")
   done < <(lsblk -dn -o NAME,SIZE,RM,MODEL | awk '$3 == 0 && $1 !~ /^(zram|loop|fd|sr|dm-|md)/ { print "/dev/" $1, $2, $4 }')
-  pick_list 6 "INSTALLATION DISK" "Every byte of the chosen disk will be erased." lines || return 1
+  pick_list 6 "INSTALLATION DISK" "One disk is chosen here; Spark sizes and partitions it automatically." lines || return 1
   DISK=${PICK%% *}
-  acts=("Automatic - 80 GB, or 25% on disks under 320 GB" "Maximum - the entire disk" "Custom - enter the size in GiB (minimum 24)")
-  pick_list 6 "SYSTEM SIZE" "How much of $DISK should Spark use?" acts || return 1
-  case "$PICK" in
-    Automatic*) ROOT_SIZE=auto ;;
-    Maximum*)   ROOT_SIZE=max ;;
-    Custom*)    num_ask 6 "CUSTOM SIZE" "System size in GiB" 24 || return 1; ROOT_SIZE=$FIELD ;;
-  esac
+  ROOT_SIZE=auto
   record 6; save_answers
 }
 

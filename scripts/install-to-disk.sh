@@ -65,7 +65,7 @@ else
   lsblk -o NAME,SIZE,MODEL | head -n 20
   read -r -p 'Target disk (e.g. /dev/vda): ' DISK
   read -r -p 'Time zone (e.g. Europe/Berlin): ' TIMEZONE
-  [ -f "/usr/share/zoneinfo/$TIMEZONE" ] || { log "unknown time zone"; exit 1; }
+  timedatectl list-timezones | grep -qxF "$TIMEZONE" || { log "unknown time zone"; exit 1; }
   read -r -p 'Locale (e.g. en_US.UTF-8): ' LOCALE
   locale -a 2>/dev/null | grep -qi "^$(printf '%s' "$LOCALE" | tr -d '.')\.utf8$" || { log "unknown locale"; exit 1; }
   read -r -p 'Computer name: ' HOSTNAME
@@ -102,7 +102,7 @@ case "$HOSTNAME" in
   *[!a-zA-Z0-9-]*|'') log "invalid hostname"; exit 1 ;;
 esac
 HOSTNAME=$(printf '%s' "$HOSTNAME" | tr '[:upper:]' '[:lower:]')
-[ -f "/usr/share/zoneinfo/$TIMEZONE" ] || { log "unknown time zone $TIMEZONE"; exit 1; }
+timedatectl list-timezones | grep -qxF "$TIMEZONE" || { log "unknown time zone $TIMEZONE"; exit 1; }
 command -v nixos-install >/dev/null || { log "nixos-install not found - run from a NixOS live session"; exit 1; }
 for tool in parted mkfs.fat mkfs.btrfs cryptsetup nixos-generate-config; do
   command -v "$tool" >/dev/null || { log "$tool not found"; exit 1; }
@@ -157,8 +157,14 @@ partprobe "$DISK" 2>/dev/null || true
 sleep 1
 ESP_PART=/dev/disk/by-partlabel/SPARK-BOOT
 ROOT_PART=/dev/disk/by-partlabel/SPARK-ROOT
-for _ in $(seq 1 10); do [ -e "$ROOT_PART" ] && break; sleep 1; done
-[ -e "$ROOT_PART" ] || { log "partition nodes did not appear"; exit 1; }
+for _ in $(seq 1 10); do [ -e "$ESP_PART" ] && [ -e "$ROOT_PART" ] && break; sleep 1; done
+[ -e "$ESP_PART" ] && [ -e "$ROOT_PART" ] || { log "partition nodes did not appear"; exit 1; }
+
+# The EFI system partition carries the boot loader of the installed
+# system. parted only carves the partition - a fresh FAT32 filesystem
+# with the ESP label is created here, right after the partition nodes
+# appear, so the later boot mount always finds a mountable volume.
+mkfs.fat -F 32 -n SPARK-BOOT "$ESP_PART"
 
 # ---- encryption (optional) ---------------------------------------------------
 
@@ -214,12 +220,12 @@ chmod -R u+w "$TARGET"
 # configuration.nix imports ./hardware-configuration.nix relative to its own
 # location, and the generated file describes the freshly created volumes.
 # The generated luks entries would declare the volume a second time (Spark
-# names the device in local.nix), so they are stripped; the generated
-# configuration.nix template is removed because the flake defines its
-# configurations in flake.nix and nothing imports the template.
+# names the device in local.nix), so they are stripped. nixos-generate-config
+# never overwrites an existing configuration.nix, so the copied distro file -
+# which the flake imports - survives untouched; the generator only adds the
+# machine's hardware description next to it.
 nixos-generate-config --root /mnt --dir "$TARGET"
 sed -i -e '/boot.initrd.luks/d' "$TARGET/hardware-configuration.nix"
-rm -f "$TARGET/configuration.nix"
 
 # installed-boot.nix carries the boot loader of the machine. Every value is
 # a default: shared modules may refine them, and the ISO (which never sees
@@ -278,7 +284,6 @@ nixos-install --flake "$TARGET#spark" --no-root-passwd
 install -m 600 "$PW_FILE" /mnt/etc/spark/root-password
 install -m 600 "$USERS_SOURCE" /mnt/etc/spark/homed-users
 touch /mnt/etc/spark/firstboot
-sed -i "s/time.timeZone = lib.mkDefault \"UTC\";/time.timeZone = lib.mkDefault \"$TIMEZONE\";/" "$TARGET/configuration.nix"
 
 # ---- teardown -----------------------------------------------------------------------
 
