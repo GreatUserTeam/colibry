@@ -1,5 +1,5 @@
-# Identity module of Spark.
-# Rebrands the base system so Spark is a self-contained distribution: the
+# Identity module of Skein.
+# Rebrands the base system so Skein is a self-contained distribution: the
 # os-release identity, the login console greeting and the boot appearance
 # carry no upstream distribution name.
 { config, pkgs, lib, ... }:
@@ -7,23 +7,23 @@
 {
   # The distribution ID feeds /etc/os-release and the default ISO file name;
   # it is the machine-readable identity of the operating system.
-  system.nixos.distroId = "spark";
+  system.nixos.distroId = "skein";
 
   # The full os-release content is written explicitly so NAME carries the
-  # Spark identity instead of any upstream distribution name.
+  # Skein identity instead of any upstream distribution name.
   environment.etc."os-release".text = ''
-    NAME="Spark"
-    PRETTY_NAME="Spark 0.1"
-    ID=spark
+    NAME="Skein"
+    PRETTY_NAME="Skein 0.1"
+    ID=skein
     ID_LIKE="nixos"
     VERSION="0.1"
     VERSION_ID="0.1"
-    HOME_URL="https://spark.example.org/"
-    DOCUMENTATION_URL="https://spark.example.org/docs"
+    HOME_URL="https://skein.example.org/"
+    DOCUMENTATION_URL="https://skein.example.org/docs"
   '';
 
-  # The virtual console greeting shows the Spark identity only.
-  services.getty.greetingLine = "Spark 0.1 \\n \\l";
+  # The virtual console greeting shows the Skein identity only.
+  services.getty.greetingLine = "Skein 0.1 \\n \\l";
   services.getty.helpLine = "";
 
   # The bootloader gives no menu and no countdown: the machine starts

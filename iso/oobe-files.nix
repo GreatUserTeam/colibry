@@ -1,8 +1,8 @@
-# Wizard helper libraries of the Spark installer ISO.
+# Wizard helper libraries of the Skein installer ISO.
 #
-# The OOBE session runs /etc/spark/oobe.sh (installed by the base ISO
+# The OOBE session runs /etc/skein/oobe.sh (installed by the base ISO
 # module), and that script sources the terminal and widget libraries
-# below from /etc/spark. They ship as separate store files so that every
+# below from /etc/skein. They ship as separate store files so that every
 # source file of the project stays inside the line budget.
 #
 # Every library passes through parse-checking before it is allowed into
@@ -17,7 +17,7 @@ let
   # parse-checked INSTALLABLE: runs bash in no-execute parse mode over
   # the source and only copies it through when the whole file parses.
   checked = name: src:
-    pkgs.runCommand "spark-oobe-${name}-checked" {
+    pkgs.runCommand "skein-oobe-${name}-checked" {
       nativeBuildInputs = [ pkgs.bash ];
     } ''
       bash -n ${src}
@@ -25,8 +25,8 @@ let
     '';
 in
 {
-  environment.etc."spark/spark-oobe-term.sh".source =
-    checked "term" ../scripts/spark-oobe-term.sh;
-  environment.etc."spark/spark-oobe-widgets.sh".source =
-    checked "widgets" ../scripts/spark-oobe-widgets.sh;
+  environment.etc."skein/skein-oobe-term.sh".source =
+    checked "term" ../scripts/skein-oobe-term.sh;
+  environment.etc."skein/skein-oobe-widgets.sh".source =
+    checked "widgets" ../scripts/skein-oobe-widgets.sh;
 }

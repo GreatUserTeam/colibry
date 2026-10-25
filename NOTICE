@@ -1,5 +1,5 @@
 Skein
-Copyright (C) 10.23.2026 GUS-Team. All rights reserved.
+Copyright (C) 2026-10-25 GUS-Team. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -21,7 +21,7 @@ additional entries referencing the corrected ones (ILL 4.3).
 Chain entry 1 - Original Author
 ----------------------------------------------------------------
 - Author:        GUS-Team
-- Date/Version:  10.23.2026 / 0.0.1
+- Date/Version:  2026-10-25 / 0.0.3
 - Changes:       Initial release of Skein:
                  A security-first NixOS-based
                  Linux distribution (codename "Spark") with a
@@ -35,7 +35,7 @@ Chain entry 1 - Original Author
 Chain entry N - GUS-Team
 ----------------------------------------------------------------
 - Author:        GUS-Team
-- Date/Version:  10.23.2026 / 0.0.1
+- Date/Version:  2026-10-25 / 0.0.3
 - Changes:       Installer bring-up: silent UEFI boot image
                  (iso/efi-image.nix, iso/oobe-files.nix); OOBE wizard
                  split into session/terminal/widget libraries

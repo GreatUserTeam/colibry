@@ -1,4 +1,4 @@
-# Main system configuration of the Spark distribution.
+# Main system configuration of the Skein distribution.
 # This file wires together all modules and defines the base system identity.
 # Values that the installer collects in the OOBE wizard are defaults here
 # and are overridden by the generated local.nix.
@@ -12,8 +12,8 @@
        ++ lib.optionals (builtins.pathExists ./installed-boot.nix) [ ./installed-boot.nix ]
        ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
-  # The distribution identifies itself as "spark".
-  networking.hostName = lib.mkDefault "spark";
+  # The distribution identifies itself as "skein".
+  networking.hostName = lib.mkDefault "skein";
 
   # The desktop kernel. linux-zen carries the scheduling and latency
   # patches tuned for interactive desktop workloads (better input and
@@ -23,7 +23,7 @@
   boot.kernelPackages = pkgs.linuxPackages_zen;
 
   # Firmware, microcode and driver blobs carry unfree licenses (Broadcom,
-  # Intel, Realtek, Apple, NVIDIA, ...). Spark ships them deliberately;
+  # Intel, Realtek, Apple, NVIDIA, ...). Skein ships them deliberately;
   # everything else stays free-only, so no random proprietary application
   # can enter the system.
   nixpkgs.config.allowUnfreePredicate = pkg:
@@ -42,9 +42,9 @@
     settings = {
       trusted-users = [ "root" ];
       auto-optimise-store = true;
-      # The nix command and flakes are required by the automatic upgrades
-      # of the installed system (system.autoUpgrade below) and by every
-      # flake workflow a Spark user meets on the command line.
+      # The nix command and flakes are required by the update manager
+      # of the installed system (modules/updates.nix) and by every
+      # flake workflow a Skein user meets on the command line.
       experimental-features = [ "nix-command" "flakes" ];
     };
     gc = {
@@ -54,22 +54,12 @@
     };
   };
 
-  # Automatic upgrades keep the system patched without user interaction;
-  # the OOBE wizard may switch them off in the generated local.nix.
-  system.autoUpgrade = {
-    enable = lib.mkDefault true;
-    flake = "github:spark-distro/spark"; # Placeholder remote for the distro channel.
-    flags = [ "--update-input" "nixpkgs" ];
-    dates = "02:00";
-    allowReboot = false; # Spark never reboots on the user's head.
-  };
-
   # The human user account is created on the installed system by the homed
   # provisioning service (modules/encryption.nix) with an encrypted home;
   # it is intentionally not declared here. The password change at first
   # login is enforced by that service as well.
 
-  # Silent boot of every Spark system, installed machines included. The
+  # Silent boot of every Skein system, installed machines included. The
   # machine's own screen stays silent until the greeter: splash activates
   # the Plymouth theme, quiet and the show_status pair keep every status
   # line off the screen, loglevel=3 and the udev log levels keep kernel
@@ -125,7 +115,7 @@
   };
   services.pulseaudio.enable = false; # PipeWire replaces PulseAudio entirely.
 
-  # Spark root filesystems are btrfs (never ZFS); foreign ZFS pools are never
+  # Skein root filesystems are btrfs (never ZFS); foreign ZFS pools are never
   # force-imported, which protects against accidental pool hijacks.
   boot.zfs.forceImportRoot = false;
 
@@ -138,7 +128,7 @@
   };
 
   # The Nix build users of the live/installer profile sit above UID 1000;
-  # user creation is driven by the Spark provisioning service, so the
+  # user creation is driven by the Skein provisioning service, so the
   # systemd-userdb heuristic warning is acknowledged and silenced.
   services.userdbd.silenceHighSystemUsers = true;
 

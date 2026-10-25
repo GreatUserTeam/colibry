@@ -1,5 +1,5 @@
 Skein
-Copyright (C) 23.10.2026 GUS-Team. All rights reserved.
+Copyright (C) 2026-10-25 GUS-Team. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -24,11 +24,11 @@ FULL LICENSE TEXT
 ========================================================================
 
 Document: ILL - Modular Lineage License (base license)
-Version: 1.0 (adapted edition, security-corrected 2026-10-21)
-Effective date: 2026-10-15
+Version: 1.0 (adapted edition, security-corrected 2026-10-25)
+Effective date: 2026-10-25
 SPDX-License-Identifier: LicenseRef-ILL-1.0
 
-Corrective revision of 2026-10-21 (corrective, not a new
+Corrective revision of 2026-10-25 (corrective, not a new
 edition; Section 14.2 continues to apply):
   F1 - 10.1: patent license narrowed to the uses permitted
        by the License Stack (no sell/offer for sale absent
@@ -111,7 +111,7 @@ HOW TO APPLY
 2. Identify which files are ILL Files. Recommended per-file
    header:
        SPDX-License-Identifier: ILL-1.0
-       Copyright (C) 23.10.2026 GUS-Team
+       Copyright (C) 2026-10-25 GUS-Team
    and/or a per-component list in the NOTICE file. (If
    your compliance tooling requires an SPDX-listed
    identifier, use LicenseRef-ILL-1.0.)

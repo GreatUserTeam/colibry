@@ -1,11 +1,11 @@
-# ISO image module of Spark.
-# This file turns the Spark system into the bootable installer image.
-# The image boots straight into the Spark boot splash and from there into
+# ISO image module of Skein.
+# This file turns the Skein system into the bootable installer image.
+# The image boots straight into the Skein boot splash and from there into
 # the OOBE wizard: neither boot loader shows a menu, no log output ever
 # reaches the screen, and no login terminal exists anywhere on the
 # system. The full journal is mirrored to the serial console (the
 # error-tracing channel, see configuration.nix) and the journal mirror on
-# tty1 exists only in spark.debug builds.
+# tty1 exists only in skein.debug builds.
 { config, pkgs, lib, modulesPath, ... }:
 
 let
@@ -14,10 +14,10 @@ let
   # no binary artwork asset and no upstream boot artwork is ever visible
   # behind a loader menu. librsvg is already in the build closure, so
   # rendering adds no new dependency.
-  blackBackgroundSvg = pkgs.writeText "spark-black-background.svg" ''
+  blackBackgroundSvg = pkgs.writeText "skein-black-background.svg" ''
     <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect width="1920" height="1080" fill="#000000"/></svg>
   '';
-  blackBackground = pkgs.runCommand "spark-black-background" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
+  blackBackground = pkgs.runCommand "skein-black-background" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
     rsvg-convert ${blackBackgroundSvg} -o $out
   '';
 in
@@ -45,9 +45,9 @@ in
   ];
 
   # The live session overrides the installed system's hostname.
-  networking.hostName = lib.mkForce "spark-live";
+  networking.hostName = lib.mkForce "skein-live";
 
-  # The live session boots through the same Spark Plymouth splash as the
+  # The live session boots through the same Skein Plymouth splash as the
   # installed system (modules/plymouth.nix); only the handover from the
   # splash to the wizard differs: plymouth-quit yields the console to the
   # OOBE session on tty1.
@@ -55,7 +55,7 @@ in
 
   # The complete silent-boot command line, forced as a whole. Both boot
   # loaders embed exactly this list into their kernel command line. The
-  # screen stays silent (splash paints the Spark theme, quiet, the
+  # screen stays silent (splash paints the Skein theme, quiet, the
   # show_status pair, loglevel=3, the udev levels, hidden cursor); the
   # FIRST console is the serial port, so the whole boot journal of the
   # live session is traceable from the host the machine runs on.
@@ -76,7 +76,7 @@ in
   boot.consoleLogLevel = 3;
 
   isoImage = {
-    volumeID = "SPARK";
+    volumeID = "SKEIN";
     makeEfiBootable = true;  # UEFI systems boot from the stick.
     makeUsbBootable = true;  # Legacy BIOS systems boot from the stick as well.
     squashfsCompression = "zstd -Xcompression-level 19"; # Smaller image, faster decompression.
@@ -87,7 +87,7 @@ in
     splashImage = blackBackground;    # BIOS (ISOLINUX) background.
     efiSplashImage = blackBackground; # UEFI (GRUB) background.
 
-    # The ISO builder normally draws the NixOS GRUB theme on the UEFI boot
+    # The ISO builder normally draws the upstream GRUB theme on the UEFI boot
     # path; a null theme leaves only the black splash image behind.
     grubTheme = null;
 
@@ -119,7 +119,7 @@ in
     #   * MENU HIDDEN skips the menu completely and boots the DEFAULT entry
     #     after that timeout. Pressing any key during the one-second window
     #     reveals the menu for rescue boots.
-    # The MENU COLOR lines re-skin the revealed menu with the Spark colors
+    # The MENU COLOR lines re-skin the revealed menu with the Skein colors
     # (black background, light text) instead of the upstream color scheme.
     syslinuxTheme = lib.mkForce ''
       TIMEOUT 10
@@ -140,8 +140,8 @@ in
     '';
   };
 
-  # The output file keeps the distro name and the NixOS version.
-  image.fileName = "spark-${config.system.nixos.version}.iso";
+  # The output file keeps the distro name and the system version.
+  image.fileName = "skein-${config.system.nixos.version}.iso";
 
   # Zero is perfect for the UEFI path (GRUB boots its default entry
   # immediately without drawing a menu) and is kept for the BIOS path as
@@ -155,7 +155,7 @@ in
   services.xserver.displayManager.lightdm.enable = lib.mkForce false;
 
   # No automatic login anywhere on the installer. The installation CD base
-  # enables getty autologin for its demo account; on Spark the serial
+  # enables getty autologin for its demo account; on Skein the serial
   # console is a debugging channel and must ask for a login like every
   # other terminal.
   services.getty.autologinUser = lib.mkForce null;
@@ -170,9 +170,9 @@ in
   # encrypted systemd-homed accounts exist only on installed systems. The
   # account exists so files inside the live system have an owner; the OOBE
   # session itself runs as root.
-  users.users.sparkuser = {
+  users.users.skeinuser = {
     isNormalUser = true;
-    description = "Spark User";
+    description = "Skein User";
     extraGroups = [ "networkmanager" "video" "audio" "input" "wheel" ];
     password = "";
     shell = pkgs.zsh;
@@ -192,13 +192,13 @@ in
   systemd.services."getty@".enable = false;
   systemd.services."autovt@".enable = false;
 
-  # Debug surface, gated behind the spark.debug kernel parameter: the
+  # Debug surface, gated behind the skein.debug kernel parameter: the
   # on-screen boot journal mirror. A normal boot has nothing extra: nothing
   # is ever printed for the user.
-  systemd.services.spark-boot-console = {
+  systemd.services.skein-boot-console = {
     description = "Mirror the boot journal onto tty1 (debug builds only)";
     wantedBy = [ "sysinit.target" ];
-    unitConfig.ConditionKernelCommandLine = "spark.debug";
+    unitConfig.ConditionKernelCommandLine = "skein.debug";
     serviceConfig = {
       Type = "simple";
       Restart = "on-failure";
@@ -236,15 +236,15 @@ in
   # finished step. Only the terminal reset travels with the restart: the
   # hangup and VT deallocation options are deliberately omitted, because
   # cycling them on a restarting service is what wedges the console.
-  systemd.services.spark-oobe = {
-    description = "Spark OOBE installer session";
+  systemd.services.skein-oobe = {
+    description = "Skein OOBE installer session";
     wantedBy = [ "multi-user.target" ];
     wants = [ "plymouth-quit.service" ];
     after = [ "plymouth-quit.service" ];
-    unitConfig.ConditionPathExists = "!/etc/spark/oobe-done";
+    unitConfig.ConditionPathExists = "!/etc/skein/oobe-done";
     # If the session crashes, the failure surface unit below paints the
     # error on tty1 instead of leaving a silent black screen.
-    unitConfig.OnFailure = "spark-oobe-fail.service";
+    unitConfig.OnFailure = "skein-oobe-fail.service";
     # The wizard calls timedatectl, lsblk and the core file tools by name;
     # they are added to the unit PATH because a TTY service has no login
     # shell profile. The installer script itself re-exports the full system
@@ -268,7 +268,7 @@ in
       StandardInput = "tty";
       StandardOutput = "tty";
       StandardError = "journal";
-      ExecStart = "${pkgs.bash}/bin/bash /etc/spark/oobe.sh";
+      ExecStart = "${pkgs.bash}/bin/bash /etc/skein/oobe.sh";
       Restart = "always";
       RestartSec = "2";
     };
@@ -281,7 +281,7 @@ in
   # goes to the journal and from there to the serial console - so a broken
   # session leaves readable evidence both on the screen and in the
   # host-side boot log.
-  systemd.services.spark-oobe-fail = {
+  systemd.services.skein-oobe-fail = {
     description = "Surface OOBE session failures on tty1";
     serviceConfig = {
       Type = "oneshot";
@@ -290,19 +290,19 @@ in
       StandardOutput = "tty";
       StandardError = "journal";
       Environment = [ "TERM=linux" "LANG=C.UTF-8" ];
-      ExecStart = toString (pkgs.writeShellScript "spark-oobe-fail" ''
+      ExecStart = toString (pkgs.writeShellScript "skein-oobe-fail" ''
         printf '\033[2J\033[H'
-        printf 'The Spark installer session crashed and will retry.\n\n'
-        printf -- '--- /var/log/spark-oobe.log (command trace) ---\n'
-        tail -n 30 /var/log/spark-oobe.log 2>/dev/null
-        printf -- '\n--- journal (spark-oobe) ---\n'
-        journalctl -u spark-oobe -n 30 --no-pager 2>/dev/null
+        printf 'The Skein installer session crashed and will retry.\n\n'
+        printf -- '--- /var/log/skein-oobe.log (command trace) ---\n'
+        tail -n 30 /var/log/skein-oobe.log 2>/dev/null
+        printf -- '\n--- journal (skein-oobe) ---\n'
+        journalctl -u skein-oobe -n 30 --no-pager 2>/dev/null
         printf '\nRetrying in a few seconds...\n'
         # The same trace tail goes to stderr: the unit sends it to the
         # journal, and journald mirrors it to the serial console.
         {
-          printf -- '--- spark-oobe trace tail ---\n'
-          tail -n 30 /var/log/spark-oobe.log 2>/dev/null
+          printf -- '--- skein-oobe trace tail ---\n'
+          tail -n 30 /var/log/skein-oobe.log 2>/dev/null
           printf -- '--- end of trace tail ---\n'
         } >&2
       '');
@@ -312,16 +312,16 @@ in
   # The AIDE database builder belongs to installed systems. On the
   # throwaway live session there is nothing to attest and the unit would
   # only print a [FAILED] line during the silent boot.
-  systemd.services.spark-aide-init.enable = false;
+  systemd.services.skein-aide-init.enable = false;
 
   # The OOBE wizard and the disk installer ship inside the live system.
-  environment.etc."spark/oobe.sh".source = ../scripts/spark-oobe.sh;
-  environment.etc."spark/install.sh".source = ../scripts/install-to-disk.sh;
+  environment.etc."skein/oobe.sh".source = ../scripts/skein-oobe.sh;
+  environment.etc."skein/install.sh".source = ../scripts/install-to-disk.sh;
 
   # The list of UTF-8 locales is baked into the image at build time:
   # reading it at runtime would need LOCALE_ARCHIVE, which a bare TTY service
   # does not have. glibcLocales carries the full archive.
-  environment.etc."spark/locales".source = pkgs.runCommand "spark-locale-list" { } ''
+  environment.etc."skein/locales".source = pkgs.runCommand "skein-locale-list" { } ''
     LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive \
       ${pkgs.glibc.bin}/bin/locale -a \
       | grep -iE 'utf-?8$' | sort > $out
@@ -330,11 +330,11 @@ in
   # The list of console keyboard layouts is baked into the image at build
   # time as well: the layouts ship inside the kbd package in the Nix
   # store, and the localectl tool cannot enumerate them there - it only
-  # reads the /usr/share/kbd directory, which does not exist on a NixOS
+  # reads the /usr/share/kbd directory, which does not exist on this
   # system. The wizard reads this file instead of calling localectl. Every
   # *.map.gz under the keymaps directory becomes one entry named like the
   # console keyMap values of the installed system ("us", "ru", "de-latin1", ...).
-  environment.etc."spark/keymaps".source = pkgs.runCommand "spark-keymap-list" { } ''
+  environment.etc."skein/keymaps".source = pkgs.runCommand "skein-keymap-list" { } ''
     find ${pkgs.kbd}/share/keymaps -type f -name '*.map.gz' \
       | sed 's|.*/||; s|\.map\.gz$||' \
       | sort -u > $out
@@ -345,7 +345,7 @@ in
   # copy. Build-time junk never ships: the filter drops test disks, the
   # result symlink and VCS metadata. The flake.lock ships with the flake
   # and pins every input (see the assertion above).
-  environment.etc."spark/flake".source = lib.cleanSourceWith {
+  environment.etc."skein/flake".source = lib.cleanSourceWith {
     src = ../.;
     filter = path: type:
       let base = baseNameOf path;
@@ -362,9 +362,9 @@ in
     pkgs.dosfstools
     pkgs.btrfs-progs
     pkgs.e2fsprogs
-    (pkgs.writeShellScriptBin "spark-install" ''
+    (pkgs.writeShellScriptBin "skein-install" ''
       # The wrapper runs the installer with root privileges from the live session.
-      exec sudo bash /etc/spark/install.sh "$@"
+      exec sudo bash /etc/skein/install.sh "$@"
     '')
   ];
 

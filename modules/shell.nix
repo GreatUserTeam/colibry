@@ -1,4 +1,4 @@
-# Shell module of Spark.
+# Shell module of Skein.
 # Bash is replaced by Zsh as the default interactive and system shell.
 # The prompt imitates macOS Terminal: minimal, clean, no clutter.
 { config, pkgs, lib, ... }:
@@ -13,7 +13,7 @@
     histSize = 50000;
     histFile = "$HOME/.local/share/zsh/history";
 
-    # Interactive shell options: spark users should never be scared by the terminal.
+    # Interactive shell options: skein users should never be scared by the terminal.
     interactiveShellInit = ''
       # Prompt looks like macOS: "user@host folder %" in green/blue/white.
       autoload -Uz vcs_info

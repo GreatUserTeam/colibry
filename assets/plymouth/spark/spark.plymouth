@@ -1,6 +1,6 @@
 [Plymouth Theme]
 Name=spark
-Description=Spark boot splash
+Description=Skein boot splash
 ModuleName=script
 
 [script]

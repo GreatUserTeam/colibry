@@ -1,4 +1,4 @@
-# Encryption and first-boot provisioning module of Spark.
+# Encryption and first-boot provisioning module of Skein.
 # Protects data at rest: the system disk is LUKS2 (passphrase = the root
 # password chosen in the installer) with key wiping on shutdown, suspend
 # longer than 72 hours re-locks the disk, and every user home lives in its
@@ -14,43 +14,43 @@
   # Key wiping at shutdown: the volume is suspended before the disks are
   # unmounted, so the encryption keys are dropped from memory and the next
   # boot always asks for the passphrase.
-  systemd.services.spark-key-wipe = {
+  systemd.services.skein-key-wipe = {
     description = "Suspend the LUKS root volume on shutdown";
     wantedBy = [ "shutdown.target" ];
     before = [ "shutdown.target" "umount.target" ];
     unitConfig.DefaultDependencies = false;
-    unitConfig.ConditionPathExists = "/dev/mapper/spark-root";
+    unitConfig.ConditionPathExists = "/dev/mapper/skein-root";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.cryptsetup}/bin/cryptsetup luksSuspend spark-root";
+      ExecStart = "${pkgs.cryptsetup}/bin/cryptsetup luksSuspend skein-root";
     };
   };
 
   # Hibernation guard: the timestamp of the last suspend is written to the
   # ESP; if the system wakes up more than 72 hours later, every logged-in
   # user is terminated, the disk is re-locked and the machine powers off.
-  systemd.services.spark-hibernate-guard-suspend = {
+  systemd.services.skein-hibernate-guard-suspend = {
     description = "Record the suspend time for the hibernation guard";
     wantedBy = [ "suspend.target" ];
     after = [ "suspend.target" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.coreutils}/bin/date +%%s > /boot/spark-last-suspend";
+      ExecStart = "${pkgs.coreutils}/bin/date +%%s > /boot/skein-last-suspend";
     };
   };
-  systemd.services.spark-hibernate-guard-resume = {
+  systemd.services.skein-hibernate-guard-resume = {
     description = "Re-lock the disk after long hibernation";
     wantedBy = [ "suspend.target" ];
     before = [ "suspend.target" ];
     unitConfig.DefaultDependencies = false;
-    unitConfig.ConditionPathExists = "/dev/mapper/spark-root";
+    unitConfig.ConditionPathExists = "/dev/mapper/skein-root";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.writeShellScript "spark-hibernate-guard" ''
+      ExecStart = "${pkgs.writeShellScript "skein-hibernate-guard" ''
         set -u
-        STAMP=/boot/spark-last-suspend
+        STAMP=/boot/skein-last-suspend
         [ -f "$STAMP" ] || exit 0
         NOW=$(${pkgs.coreutils}/bin/date +%s)
         THEN=$(${pkgs.coreutils}/bin/cat "$STAMP")
@@ -65,7 +65,7 @@
                 ${pkgs.systemd}/bin/loginctl terminate-user "$U" 2>/dev/null || true
               done
           ${pkgs.coreutils}/bin/sleep 1
-          ${pkgs.cryptsetup}/bin/cryptsetup luksSuspend spark-root || true
+          ${pkgs.cryptsetup}/bin/cryptsetup luksSuspend skein-root || true
           ${pkgs.systemd}/bin/systemctl poweroff
         fi
       ''}";
@@ -73,7 +73,7 @@
   };
 
   # Per-user home encryption: systemd-homed keeps every home directory in
-  # its own LUKS volume; the PAM/NSS integration is provided by the NixOS
+  # its own LUKS volume; the PAM/NSS integration is provided by the system
   # module, no custom glue is needed.
   services.homed = {
     enable = true;
@@ -85,23 +85,23 @@
   };
 
   # Root password: the installer stores the password chosen in the wizard
-  # in /etc/spark/root-password (mode 0600); this one-shot applies it with
+  # in /etc/skein/root-password (mode 0600); this one-shot applies it with
   # chpasswd and removes the file.
-  systemd.services.spark-root-password = {
+  systemd.services.skein-root-password = {
     description = "Set the root password chosen in the installer";
     wantedBy = [ "multi-user.target" ];
-    unitConfig.ConditionPathExists = "/etc/spark/root-password";
+    unitConfig.ConditionPathExists = "/etc/skein/root-password";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.writeShellScript "spark-root-password" ''
+      ExecStart = "${pkgs.writeShellScript "skein-root-password" ''
         set -u
-        PWFILE=/etc/spark/root-password
+        PWFILE=/etc/skein/root-password
         PW=$(${pkgs.coreutils}/bin/cat "$PWFILE")
         if printf 'root:%s\n' "$PW" | ${pkgs.shadow}/bin/chpasswd; then
           ${pkgs.coreutils}/bin/rm -f "$PWFILE"
         else
-          ${pkgs.util-linux}/bin/logger -t spark-root-password \
+          ${pkgs.util-linux}/bin/logger -t skein-root-password \
             "ERROR: could not set the root password"
         fi
       ''}";
@@ -109,29 +109,29 @@
   };
 
   # User accounts: the installer stores one "username<TAB>password" line
-  # per account in /etc/spark/homed-users (mode 0600). This one-shot creates
+  # per account in /etc/skein/homed-users (mode 0600). This one-shot creates
   # every account with an encrypted homed home, forcing a password change at
   # the first login, and removes the file. If a homed account cannot be
   # created, a classic account with the same password is created instead
   # (with the forced change applied directly), so a login always exists.
-  systemd.services.spark-homed-create = {
-    description = "Create the Spark user accounts with encrypted homes";
+  systemd.services.skein-homed-create = {
+    description = "Create the Skein user accounts with encrypted homes";
     wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-homed.service" "spark-root-password.service" ];
-    unitConfig.ConditionPathExists = "/etc/spark/homed-users";
+    after = [ "systemd-homed.service" "skein-root-password.service" ];
+    unitConfig.ConditionPathExists = "/etc/skein/homed-users";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
-    serviceConfig.ExecStart = "${pkgs.writeShellScript "spark-homed-create" ''
+    serviceConfig.ExecStart = "${pkgs.writeShellScript "skein-homed-create" ''
       set -u
-      USERSFILE=/etc/spark/homed-users
+      USERSFILE=/etc/skein/homed-users
       TAB=$(printf '\t')
 
       while IFS="$TAB" read -r USER PW; do
         [ -n "$USER" ] || continue
         if ! echo "$USER" | ${pkgs.gnugrep}/bin/grep -qE '^[a-z_][a-z0-9_-]{0,31}$'; then
-          ${pkgs.util-linux}/bin/logger -t spark-homed-create \
+          ${pkgs.util-linux}/bin/logger -t skein-homed-create \
             "skipping invalid user name '$USER'"
           continue
         fi
@@ -165,7 +165,7 @@
           -s ${pkgs.zsh}/bin/zsh "$USER"
         ${pkgs.coreutils}/bin/printf '%s:%s\n' "$USER" "$PW" | ${pkgs.shadow}/bin/chpasswd
         ${pkgs.shadow}/bin/chage -d 0 "$USER"
-        ${pkgs.util-linux}/bin/logger -t spark-homed-create \
+        ${pkgs.util-linux}/bin/logger -t skein-homed-create \
           "WARNING: homed account creation failed for $USER; created a classic account, home is not encrypted"
       done < "$USERSFILE"
 

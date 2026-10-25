@@ -1,58 +1,93 @@
-# Spark — security-first NixOS distribution (prototype v0.1)
+# Skein — security-first NixOS distribution
 
-Spark is a NixOS distribution for people who do not want to think about
+Skein is a NixOS distribution for people who do not want to think about
 computers. It assumes hostile defaults (internet, USB sticks, attachments)
-and wraps the whole system in hardening, while exposing a purely
-mouse-driven Hyprland desktop with a macOS-like dock.
+and wraps the whole system in hardening: full-disk LUKS2 encryption, an
+nftables firewall, a DNS stack with DNSSEC and encrypted upstreams, USB
+device guard, always-on antivirus and mandatory access control — while the
+user-facing surface stays silent and simple: a graphical out-of-box
+experience wizard, a boot splash with no text, and updates that install
+themselves.
 
-## Build
+## Build the installer ISO
 
 ```sh
-git clone https://github.com/spark-distro/spark && cd spark
-nixos-rebuild switch --flake .#spark        # or: nix build .#nixosConfigurations.spark.config.system.build.toplevel
+git clone <repo> && cd skein
+./build.sh            # builds result/iso/skein-*.iso, prints its sha256, cleans the store
+./build.sh run        # build, then boot the ISO in QEMU with a serial log
+./build.sh clean      # drop the result link and garbage-collect the store
 ```
+
+`build.sh` retries the nix build on transient network failures and
+syntax-checks every installer script before any nix work starts. `run.sh`
+creates a test disk on first use and records the full guest serial log in
+`skein.log` together with the ISO hash it booted.
 
 ## Layout
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `flake.nix` | Pins nixpkgs, Hyprland, quckshell, nixpak; exposes system `spark` |
-| `configuration.nix` | Base system: user, auto-updates, firmware, auto-login |
-| `modules/security.nix` | Firewall (nftables, stealth drops), DNS-over-TLS, AppArmor, auditd, USBGuard, ClamAV, sysctl hardening |
-| `modules/encryption.nix` | LUKS2 policy, key wipe on shutdown, 72-hour hibernation guard, gocryptfs home encryption for inactive users |
-| `modules/sandbox.nix` | nixpak bubblewrap sandboxes for all network/document apps, XDG portals |
-| `modules/usb.nix` | Boot-time USB automount, UDisks2, NTFS/exFAT support |
-| `modules/nightlight.nix` | gammastep screen color temperature manager (GeoClue location) |
-| `modules/shell.nix` | Zsh replaces bash; macOS-style prompt; friendly aliases |
-| `modules/packages.nix` | Drivers (all firmware, PipeWire), codecs, friendly tool replacements, ConvertX |
-| `modules/desktop.nix` | Hyprland 0.55+ with the Lua config: shadows, inactive dimming, SUPER/ALT keybindings |
-| `hypr/hyprland.lua` | Compositor config: window actions on SUPER, everything else on ALT |
-| `qs/shell.qml` | quckshell prototype: dock (pinned/frequent/recent/running/minimized/stack/trash), window titles, overview, launcher |
-| `qs/*.qml` | Dock components and persistence stores |
+| `flake.nix` | Pins all inputs; exposes `nixosConfigurations.skein` and `.skein-iso` |
+| `configuration.nix` | Base identity: kernel, firmware policy, silent boot, update manager |
+| `modules/identity.nix` | Operating system identity (os-release, distro id, greeting) |
+| `modules/updates.nix` | Update manager: silent minor updates, confirm-then-reboot major updates |
+| `modules/encryption.nix` | LUKS2 policy, key wipe on shutdown, hibernation guard, homed provisioning |
+| `modules/security.nix` | Firewall (nftables), dnsmasq + unbound DNS stack, auditd, ClamAV, USBGuard |
+| `modules/apparmor.nix` | AppArmor activation and a nix-store abstraction for profiles |
+| `modules/plymouth.nix` | Boot splash theme (logo + progress bar) starting in the initrd |
+| `modules/sandbox.nix` | nixpak bubblewrap sandboxes for network and document applications |
+| `modules/usb.nix` | Read-only USB automount with on-access antivirus scanning |
+| `modules/swap.nix` | zram plus dynamically grown btrfs swap files |
+| `modules/packages.nix` | Curated desktop application set, codecs, firmware |
+| `modules/desktop.nix` | Desktop environment and greeter |
+| `modules/greeter.nix` | Login screen |
+| `modules/nightlight.nix` | Screen color temperature after sunset |
+| `modules/shell.nix` | Zsh with friendly, Rust-first tool replacements |
+| `modules/recoll.nix` | Full-text search indexing |
+| `modules/compat.nix` | Waydroid (Android) and EXE compatibility layer |
+| `iso/iso.nix` | Installer image: OOBE session, locale/keymap baking |
+| `iso/efi-image.nix` | Silent UEFI boot image replacing the upstream GRUB banner |
+| `iso/oobe-files.nix` | OOBE helper libraries with build-time syntax checking |
+| `scripts/skein-oobe*.sh` | OOBE wizard (terminal layer, widgets, session) |
+| `scripts/install-to-disk.sh` | Disk installer: partitioning, LUKS2, btrfs, offline nixos-install |
+| `build.sh` / `run.sh` | ISO build wrapper with store hygiene / QEMU test runner |
 
 ## Design decisions
 
-- **Mouse only**: no keybindings in the shell; windows are moved/resized by
-  dragging with the mouse, the dock lives on the bottom edge, title pills
-  carry minimize/maximize/close dots. A parallel sysadmin layer adds
-  SUPER (windows) and ALT (everything else) keybindings.
-- **Inactive dimming, not transparency**: `dim_inactive` applies a mask
-  over every pixel; windows never become see-through.
-- **Sandboxing**: every GUI app (Firefox, Thunderbird, VLC, LibreOffice,
-  GIMP, KeePassXC) runs inside a nixpak bubblewrap sandbox mediated by XDG
-  portals; document apps have no network access.
-- **Encryption**: LUKS2 with key wiping at shutdown, hibernation over 72
-  hours re-locks the disk, inactive users' homes are encrypted with gocryptfs.
-- **Night light**: gammastep warms the screen after sunset using GeoClue location.
-- **Friendly replacements**: nano instead of vim, fd instead of find,
-  bat instead of cat, eza instead of ls, ripgrep instead of grep,
-  btop instead of top, duf/dust, gping, zsh with a clean macOS-like prompt.
-- **ConvertX**: packaged as `buildNpmPackage` and run as a sandboxed user
-  service on `127.0.0.1:3055` (never exposed to the LAN by the firewall).
-```
+- **Silent boot**: between the firmware and the desktop the screen shows
+  only the Skein logo and a progress bar. The ISO boots through a custom
+  EFI image whose GRUB prints nothing; kernel and systemd are quiet, the
+  only console is the serial port, which mirrors the full journal for
+  debugging.
+- **Two contours of updates**: minor updates build from the installed
+  flake and switch silently without a reboot; major updates are detected
+  against the release channel on the update server, installed only after
+  an explicit confirmation, always take the newest release and end with a
+  reboot. Front end: `skein-update status|check|confirm`.
+- **Passwords never touch the disk in plaintext**: the installer wizard
+  hashes the root password (sha512-crypt) and passes the LUKS passphrase
+  only through the process environment; user account passwords are set by
+  each user at first login.
+- **Offline installation**: the installer copies the distro flake (with
+  its lock file) from the live system onto the target, builds the system
+  closure against the live store before installing and never needs the
+  network at install time.
+- **Disk layout**: a 1 GiB EFI system partition and one btrfs partition
+  (subvolumes `@`, `@home`, `@var`, `@snapshots`, `@swap`) inside LUKS2;
+  the rest of the disk stays unallocated, like a factory Windows install.
+- **AppArmor on a Nix base**: the kernel activates AppArmor as the system
+  LSM, and profiles include a `nix-store` abstraction, because stock
+  AppArmor abstractions describe an FHS host and deny legitimate access
+  to `/nix/store`.
+- **Sandboxing**: network and document applications run inside nixpak
+  bubblewrap sandboxes mediated by XDG portals; document applications have
+  no network access.
+- **Memory**: zram compression is always on; swap files inside a
+  dedicated btrfs subvolume grow under memory pressure.
+- **Security by default**: USB sticks mount read-only and are scanned,
+  plaintext DNS never leaves the machine, and MAC randomization is on.
 
-Пояснения по новым частям:
+## License
 
-- **nixpak** — это именно то, что вы имели в виду: `github:nixpak/nixpak`, оборачивает пакеты в bubblewrap-сандбоксы с порталами как у Flatpak. Здесь все сетевые и документные приложения заменены сандбоксированными сборками через overlay — док ничего не замечает, документные приложения (LibreOffice, GIMP, KeePassXC) вообще без сети.
-- **Шифрование**: LUKS2 как единственный разрешённый layout; при выключении/перезагрузке юнит делает `cryptsetup luksSuspend` (ключи вытираются из RAM); при гибернации метка времени пишется на `/boot`, а при пробуждении, если прошло больше 72 часов, — блокировка сессий, повторный `luksSuspend` и выключение, то есть следующая загрузка потребует пароль. Домашние каталоги неактивных пользователей шифруются gocryptfs: расшифровка монтируется только пока есть активная сессия.
-- **Честные оговорки**: PAM-фрагмент в `encryption.nix` и точный API `nixpak.lib.nixpak` — прототипный уровень, их надо сверить с актуальным nixpak при первой сборке; UUID диска — плейсхолдер, который подставляет инсталлятор.
+Skein is distributed under the ILL (Modular Lineage License). See
+`NOTICE` for the authorship chain and third-party components.

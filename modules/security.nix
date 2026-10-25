@@ -1,12 +1,12 @@
-# Security module of Spark.
-# Hardening is aggressive: Spark users are non-technical, so the system
+# Security module of Skein.
+# Hardening is aggressive: Skein users are non-technical, so the system
 # protects them even when they click on the wrong thing. Every control
 # fails closed only for attacks, never for the user, and stays invisible
 # in daily use. Session locking itself lives in modules/desktop.nix.
 { config, pkgs, lib, ... }:
 
 {
-  options.spark.usbParanoid = lib.mkOption {
+  options.skein.usbParanoid = lib.mkOption {
     type = lib.types.bool;
     default = false;
     description = ''
@@ -86,27 +86,27 @@
         server = [ "127.0.0.53" ]; # Everything goes through unbound.
         "domain-needed" = true; # Never leak plain hostnames upstream.
         "bogus-priv" = true; # Reverse lookups stay local.
-        "addn-hosts" = "/var/lib/spark-adblock/hosts"; # The gravity blocklist.
+        "addn-hosts" = "/var/lib/skein-adblock/hosts"; # The gravity blocklist.
       };
     };
     # dnsmasq must not start before the first blocklist exists.
     systemd.services.dnsmasq = {
-      wants = [ "spark-adblock-update.service" ];
-      after = [ "spark-adblock-update.service" ];
+      wants = [ "skein-adblock-update.service" ];
+      after = [ "skein-adblock-update.service" ];
     };
 
     # Downloads and merges the tracker/ad/malware blocklists into the
     # hosts format dnsmasq reads: one "0.0.0.0 <domain>" line per name.
-    systemd.services.spark-adblock-update = {
-      description = "Refresh the Spark DNS blocklists";
+    systemd.services.skein-adblock-update = {
+      description = "Refresh the Skein DNS blocklists";
       serviceConfig = {
         Type = "oneshot";
-        StateDirectory = "spark-adblock";
+        StateDirectory = "skein-adblock";
       };
       path = [ pkgs.curl pkgs.gawk pkgs.coreutils ];
       script = ''
         set -eu
-        OUT=/var/lib/spark-adblock/hosts
+        OUT=/var/lib/skein-adblock/hosts
         TMP=$OUT.tmp
         : > "$TMP"
         for url in \
@@ -120,7 +120,7 @@
         chmod 644 "$OUT"
       '';
     };
-    systemd.timers.spark-adblock-update = {
+    systemd.timers.skein-adblock-update = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnBootSec = "5min";
@@ -189,7 +189,7 @@
       session required ${pkgs.shadow}/lib/security/pam_unix.so
     '';
 
-    # SSH server is disabled entirely; Spark is a desktop, not a server.
+    # SSH server is disabled entirely; Skein is a desktop, not a server.
     services.openssh.enable = false;
 
     # ClamAV runs as a permanent on-access daemon; signatures update
@@ -203,7 +203,7 @@
     # A full disk scan runs weekly at the lowest possible priority, so it
     # never disturbs the user; a detection fails the unit so it shows up
     # in the logs.
-    systemd.services.spark-clamscan-weekly = {
+    systemd.services.skein-clamscan-weekly = {
       description = "Weekly full antivirus scan";
       serviceConfig.Type = "oneshot";
       path = [ pkgs.clamav pkgs.util-linux pkgs.coreutils ];
@@ -214,7 +214,7 @@
           --log=/var/log/clamav-weekly.log /
       '';
     };
-    systemd.timers.spark-clamscan-weekly = {
+    systemd.timers.skein-clamscan-weekly = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "Sun 03:00:00";
@@ -227,14 +227,14 @@
     services.fail2ban.enable = true;
 
     # USBGuard authorizes USB devices at the kernel level (BadUSB).
-    # Smart mode (default) allows mass storage because the Spark USB
+    # Smart mode (default) allows mass storage because the Skein USB
     # policy mounts it read-only + noexec and scans it; all other new
     # device classes stay blocked until an administrator approves them.
     services.usbguard = {
       enable = true;
       presentDevicePolicy = "allow";
       insertedDevicePolicy = "block";
-      rules = lib.optionalString (!config.spark.usbParanoid) ''
+      rules = lib.optionalString (!config.skein.usbParanoid) ''
         allow with-interface one-of { 08:*:* }
       '';
     };
@@ -312,7 +312,7 @@
       /etc NORMAL
       /boot NORMAL
     '';
-    systemd.services.spark-aide-init = {
+    systemd.services.skein-aide-init = {
       description = "Build the initial AIDE integrity database";
       wantedBy = [ "multi-user.target" ];
       unitConfig.ConditionPathExists = "!/var/lib/aide/aide.db";
@@ -327,9 +327,9 @@
         mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
       '';
     };
-    systemd.services.spark-aide-check = {
+    systemd.services.skein-aide-check = {
       description = "Daily AIDE integrity check";
-      after = [ "spark-aide-init.service" ];
+      after = [ "skein-aide-init.service" ];
       serviceConfig = {
         Type = "oneshot";
         StateDirectory = "aide";
@@ -340,7 +340,7 @@
         aide --check > /var/log/aide-report.log 2>&1
       '';
     };
-    systemd.timers.spark-aide-check = {
+    systemd.timers.skein-aide-check = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "daily";

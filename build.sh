@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Spark ISO builder with store hygiene and build verification.
+# Skein ISO builder with store hygiene and build verification.
 #
 # A full ISO build writes 15-30 GB of new paths into the Nix store, so this
 # wrapper garbage-collects every store path the fresh image does not
@@ -27,14 +27,20 @@ ISO_LINK=result
 # instead of dying with a full disk halfway through.
 MIN_FREE_GB=40
 
+# How many times a failed nix build is retried before giving up. Every
+# already downloaded or built path stays in the store, so a retry always
+# continues where the previous attempt stopped; only genuine evaluation
+# errors repeat identically and surface after the last attempt.
+BUILD_ATTEMPTS=3
+
 # Preflight: every wizard and installer script must parse before any nix
 # work starts. A script corrupted in transfer would otherwise surface its
 # syntax error only inside the virtual machine, half an hour after the
 # build began; here the same failure takes milliseconds and names the file.
 for script in \
-    scripts/spark-oobe.sh \
-    scripts/spark-oobe-term.sh \
-    scripts/spark-oobe-widgets.sh \
+    scripts/skein-oobe.sh \
+    scripts/skein-oobe-term.sh \
+    scripts/skein-oobe-widgets.sh \
     scripts/install-to-disk.sh; do
   if [ -f "$script" ] && ! bash -n "$script" 2>/dev/null; then
     echo "error: $script does not parse; the file is corrupted - replace it with a fresh copy." >&2
@@ -90,7 +96,7 @@ iso_of() {
 # SHA-256 of the image, then garbage collect every path the previous
 # build kept alive.
 build_iso() {
-  local avail iso iso_real
+  local avail iso iso_real attempt
   avail=$(free_gb)
   if [ "$avail" -lt "$MIN_FREE_GB" ]; then
     echo "error: only ${avail} GiB free on /nix; at least ${MIN_FREE_GB} GiB are needed for a build." >&2
@@ -103,7 +109,17 @@ build_iso() {
   # stays bootable. The link created here is registered by nix as a
   # garbage collector root under its final name, so the cleanup below
   # never collects the fresh image.
-  nix build .#spark-iso --out-link "$ISO_LINK" --print-build-logs
+  for (( attempt = 1; attempt <= BUILD_ATTEMPTS; attempt++ )); do
+    if nix build .#skein-iso --out-link "$ISO_LINK" --print-build-logs; then
+      break
+    fi
+    if [ "$attempt" -eq "$BUILD_ATTEMPTS" ]; then
+      echo "error: the build failed ${BUILD_ATTEMPTS} times in a row; see the log above." >&2
+      exit 1
+    fi
+    echo "build attempt ${attempt} failed; retrying (already fetched paths are kept)..." >&2
+    sleep 5
+  done
 
   iso=$(iso_of "$ISO_LINK")
   if [ -z "$iso" ]; then
@@ -125,7 +141,7 @@ build_iso() {
 
 # Require the flake entry point so the error names the real problem
 # instead of a deep nix evaluation failure.
-[ -f flake.nix ] || { echo "error: flake.nix not found - run this script from the Spark repository root." >&2; exit 1; }
+[ -f flake.nix ] || { echo "error: flake.nix not found - run this script from the Skein repository root." >&2; exit 1; }
 command -v nix >/dev/null || { echo "error: nix is not installed or not on PATH." >&2; exit 1; }
 # Pin the flake workflow for every nix invocation below.
 export NIX_CONFIG="experimental-features = nix-command flakes"
