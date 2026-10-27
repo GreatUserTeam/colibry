@@ -1,0 +1,84 @@
+// Skein Plymouth script: a white logo sits exactly in the center of a
+// black screen, and a thin progress bar sits exactly in the middle of
+// the vertical gap between the bottom edge of the logo and the bottom
+// edge of the screen. The bar fills from left to right as the boot
+// progresses; its track is a dimmed copy of the same artwork.
+//
+// All images are loaded relative to the theme's ImageDir.
+
+logo.image = Image.Load("logo.png");
+bar.image = Image.Load("bar.png");
+bar_dim.image = Image.Load("bar-dim.png");
+
+logo.sprite = Sprite();
+bar.sprite = Sprite();
+bar_fill.sprite = Sprite();
+
+// Place every element for the current screen size and reset the fill so
+// the next progress callback repaints it at the new position.
+fun layout()
+{
+    screen_w = Window.GetWidth();
+    screen_h = Window.GetHeight();
+
+    logo_w = logo.image.GetWidth();
+    logo_h = logo.image.GetHeight();
+    bar_w = bar.image.GetWidth();
+    bar_h = bar.image.GetHeight();
+
+    // Logo exactly centered on the screen.
+    logo_x = screen_w / 2 - logo_w / 2;
+    logo_y = screen_h / 2 - logo_h / 2;
+    logo.sprite.SetPosition(logo_x, logo_y, 10);
+
+    // Bottom edge of the logo: the gap below it runs to the screen edge.
+    gap_top = logo_y + logo_h;
+
+    // The bar is centered inside the gap, so its vertical center sits
+    // exactly halfway between the logo bottom edge and the screen bottom.
+    bar_x = screen_w / 2 - bar_w / 2;
+    bar_y = gap_top + (screen_h - gap_top) / 2 - bar_h / 2;
+    bar.sprite.SetPosition(bar_x, bar_y, 10);
+    bar_fill.sprite.SetPosition(bar_x, bar_y, 20);
+
+    // The fill sprite carries no image yet; a negative progress forces
+    // the first progress callback to repaint the cropped fill.
+    last_progress = -1;
+}
+
+fun show()
+{
+    logo.sprite.SetImage(logo.image);
+    logo.sprite.SetOpacity(1);
+
+    bar.sprite.SetImage(bar_dim.image);
+    bar.sprite.SetOpacity(1);
+}
+
+// The boot progress callback receives a value between 0 and 1; the fill
+// is a left-anchored crop of the full bar artwork matching that fraction.
+// A zero or negative width makes Image.Crop fail, so the early callbacks
+// leave the dimmed track on screen.
+fun progress_callback(duration, progress)
+{
+    if (progress <= 0) return;
+
+    fill_w = bar.image.GetWidth() * progress;
+    if (fill_w == 0) return;
+
+    pos = bar_fill.sprite.GetX();
+    bar_fill.image = Image.Crop(bar.image, 0, 0, fill_w, bar.image.GetHeight());
+    bar_fill.sprite.SetImage(bar_fill.image);
+    bar_fill.sprite.SetPosition(pos, bar_fill.sprite.GetY(), 20);
+    bar_fill.sprite.SetOpacity(1);
+    last_progress = progress;
+}
+
+layout();
+show();
+
+Plymouth.SetBootProgressFunction(progress_callback);
+// The layout callback is invoked whenever the display mode changes, so
+// the logo stays centered and the bar stays in the gap at every
+// resolution.
+Plymouth.SetDisplayNormalFunction(layout);

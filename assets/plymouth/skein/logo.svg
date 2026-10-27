@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Skein logo mark for the boot splash.
+     A white four-pointed star on a transparent background, symmetric
+     around the center of the 256x256 canvas, so it renders as a pure
+     white mark on the black boot screen. The Plymouth theme rasterizes
+     this file to PNG at build time. -->
+<svg
+   width="256"
+   height="256"
+   viewBox="0 0 256 256"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke-width:0;paint-order:stroke fill markers"
+     d="M 128,6 C 139,91 165,117 250,128 165,139 139,165 128,250 117,165 91,139 6,128 91,117 117,91 128,6 Z" />
+</svg>
