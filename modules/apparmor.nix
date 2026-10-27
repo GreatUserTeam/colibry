@@ -2,14 +2,6 @@
 #
 # Two Nix-specific problems are solved here:
 #
-#   * AppArmor is compiled into the kernel but not activated as the
-#     running Linux Security Module unless the command line selects it.
-#     Without it every policy silently skips (the boot log shows
-#     "Load AppArmor policies skipped, unmet condition check
-#     ConditionSecurity=apparmor"), which means the confinement layer is
-#     a no-op. The kernel parameters below pin AppArmor as the active
-#     LSM on every boot.
-#
 #   * Stock AppArmor abstractions describe a Filesystem Hierarchy Standard
 #     host: binaries live under /usr, libraries under /lib, configuration
 #     under /etc. On Skein every program, library and profiled binary
@@ -19,6 +11,13 @@
 #     in a nix build breaks the sandbox. The abstraction shipped here
 #     grants the read side of the store and the writable state of the
 #     nix daemon, and every Skein profile includes it.
+#
+#   * Activation of the kernel LSM is delegated to the upstream module:
+#     security.apparmor.enable wires AppArmor into security.lsm and the
+#     kernel command line, merged with the default module stack (yama,
+#     landlock, bpf stay available for bubblewrap-based sandboxes and
+#     the ptrace sysctl hardening). This module only marks the engine
+#     enabled by default and extends its include path.
 #
 # The abstraction is deliberately read-only for the store: profiles never
 # grant write access to /nix/store; the only writable nix paths are the
@@ -53,13 +52,9 @@ let
   '';
 in
 {
-  # Activate AppArmor as the system security module. Without these two
-  # parameters the kernel leaves the LSM slot to the default stack and
-  # every policy unit exits on its condition check, which is the silent
-  # no-op state described in the module header.
-  boot.kernelParams = [ "apparmor=1" "security=apparmor" ];
-
-  # The AppArmor policy engine itself.
+  # The upstream security.apparmor module (enabled with killUnconfined
+  # confinement in modules/security.nix) activates AppArmor as the
+  # kernel LSM through security.lsm; no kernel parameters are set here.
   security.apparmor = {
     enable = lib.mkDefault true;
 

@@ -1,32 +1,39 @@
-# Wizard helper libraries of the Skein installer ISO.
+# OOBE wizard files of the installer image.
 #
-# The OOBE session runs /etc/skein/oobe.sh (installed by the base ISO
-# module), and that script sources the terminal and widget libraries
-# below from /etc/skein. They ship as separate store files so that every
-# source file of the project stays inside the line budget.
-#
-# Every library passes through parse-checking before it is allowed into
-# the image: a library that bash cannot parse would leave the wizard
-# without its widgets, and the failure would surface only inside the
-# virtual machine. A syntax error here fails the ISO build with the
-# parser message instead, which keeps broken scripts from ever reaching
-# a boot.
-{ pkgs, ... }:
+# The wizard session (./oobe-session.nix) runs /etc/skein/oobe.sh, and
+# the wizard later invokes the disk installer as /etc/skein/install.sh.
+# Both scripts, plus the two UI libraries they source, are baked into the
+# image here. Every script is parse-checked at image build time: a script
+# corrupted in transfer fails the build with the file name instead of
+# dying silently inside the virtual machine.
+{ config, pkgs, lib, ... }:
 
 let
-  # parse-checked INSTALLABLE: runs bash in no-execute parse mode over
-  # the source and only copies it through when the whole file parses.
-  checked = name: src:
-    pkgs.runCommand "skein-oobe-${name}-checked" {
-      nativeBuildInputs = [ pkgs.bash ];
-    } ''
-      bash -n ${src}
-      cp ${src} $out
+  # checkedScript NAME TEXT: parses the script with bash -n during the
+  # image build and installs the text at /etc/skein/NAME. A syntax
+  # error aborts the build; the parse check costs milliseconds here and
+  # saves a half-hour VM cycle.
+  checkedScript = name: text:
+    let checked = pkgs.runCommand "skein-${name}-checked" { } ''
+      printf '%s' ${lib.escapeShellArg text} > script
+      ${pkgs.bash}/bin/bash -n script || {
+        echo "skein-oobe-files: $name does not parse" >&2
+        exit 1
+      }
+      cp script $out
     '';
+    in lib.nameValuePair "skein/${name}" { source = checked; };
+
+  installer = builtins.readFile ../scripts/install-to-disk.sh;
+  oobe      = builtins.readFile ../scripts/skein-oobe.sh;
+  term      = builtins.readFile ../scripts/skein-oobe-term.sh;
+  widgets   = builtins.readFile ../scripts/skein-oobe-widgets.sh;
 in
 {
-  environment.etc."skein/skein-oobe-term.sh".source =
-    checked "term" ../scripts/skein-oobe-term.sh;
-  environment.etc."skein/skein-oobe-widgets.sh".source =
-    checked "widgets" ../scripts/skein-oobe-widgets.sh;
+  environment.etc = lib.listToAttrs [
+    (checkedScript "install.sh" installer)
+    (checkedScript "oobe.sh" oobe)
+    (checkedScript "skein-oobe-term.sh" term)
+    (checkedScript "skein-oobe-widgets.sh" widgets)
+  ];
 }

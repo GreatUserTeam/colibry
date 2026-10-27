@@ -4,6 +4,13 @@
 # Kiosk session on tty1: the wizard is the only interactive surface of
 # the installer. Screen drawing goes to descriptor 3 (/dev/tty); every
 # diagnostic travels through journald to the serial console.
+#
+# Two Plymouth handovers frame the session (plymouth-quit is disabled in
+# the live session, so the wizard owns the splash timing): after the
+# first painted frame the wizard releases the boot splash, and while the
+# disk installer runs the wizard raises the same splash again, so the
+# screen shows the logo and the progress bar without a single character
+# of text on both transitions.
 set -uo pipefail
 
 # The drawing descriptor opens before anything else, and the very first
@@ -30,19 +37,26 @@ exec 18>>/var/log/skein-oobe.log
 BASH_XTRACEFD=18
 set -x
 
-# Sanity: without the baked locale and keymap lists the wizard cannot
-# run at all; the stderr message names the cause for the serial log.
+# Sanity: without the baked locale and keymap lists, the JSON writer and
+# the password hasher the wizard cannot run at all; the stderr message
+# names the cause for the serial log.
 for list in /etc/skein/locales /etc/skein/keymaps; do
   [ -s "$list" ] || { echo "skein-oobe: installer is broken: $list missing" >&2; exit 1; }
 done
+for tool in jq openssl; do
+  command -v "$tool" >/dev/null || { echo "skein-oobe: installer is broken: $tool missing" >&2; exit 1; }
+done
 
-# State and handover files.
+# State and handover files. DONE marks a finished installation: the
+# rescue shell of the live session and the provisioning services of the
+# installed system key on it. The root password plaintext lives in
+# /run (RAM) only, and the answers document carries its hash.
 STATE=/var/lib/skein-oobe.state
-ANSWERS=/var/lib/skein-oobe.answers
+ANSWERS=/var/lib/skein-oobe.json
 USERS_FILE=/var/lib/skein-oobe.users
 ROOTPW_FILE=/run/skein-oobe.rootpw
+DONE=/run/skein-oobe.done
 LOG=/var/log/skein-install.log
-DONE=/etc/skein/oobe-done
 mkdir -p /var/lib
 
 # Terminal hygiene: raw, silent input for the key decoder; the trap
@@ -51,22 +65,77 @@ stty -echo -icanon min 1 time 0 < /dev/tty
 trap 'stty sane < /dev/tty 2>/dev/null; printf "\033[?25h" >&3 2>/dev/null' EXIT
 printf 'skein-oobe: tty1 %s\n' "$(stty size < /dev/tty 2>/dev/null)" >&2
 
+# --- splash handover --------------------------------------------------------------------------
+
+# splash_show / splash_hide: raise and release the Plymouth splash around
+# the installation. Every failure mode (no client, dead daemon) degrades
+# to a no-op, so the wizard never depends on the splash being alive.
+splash_show() {
+  command -v plymouth >/dev/null 2>&1 || return 0
+  plymouthd --attach-to-session >/dev/null 2>&1 || true
+  plymouth show-splash >/dev/null 2>&1 || true
+}
+splash_hide() {
+  command -v plymouth >/dev/null 2>&1 || return 0
+  plymouth quit >/dev/null 2>&1 || true
+}
+
+# First-frame splash release: the wizard's first full frame is written
+# into the console buffer while the boot splash still owns the screen;
+# releasing the splash right after that frame makes the painted buffer
+# visible at once, so the transition renders no intermediate text. The
+# wrapper is installed once around the terminal layer's frame() and
+# fires exactly one time.
+eval "skein_frame_inner() $(declare -f frame | sed '1d')"
+frame() {
+  skein_frame_inner "$@"
+  local rc=$?
+  if [ -z "${SKEIN_SPLASH_RELEASED:-}" ]; then
+    SKEIN_SPLASH_RELEASED=1
+    plymouth quit >/dev/null 2>&1 || true
+  fi
+  return "$rc"
+}
+
 # --- persistence -----------------------------------------------------------------------------
 
 # A finished step is recorded only after its answers are safely on disk.
 record() { echo "$1" >> "$STATE"; }
 finished() { grep -qx "$1" "$STATE" 2>/dev/null; }
 
-# The answers fragment is rewritten after every finished step.
+# The answers document is rewritten after every finished step as the JSON
+# contract of scripts/install-to-disk.sh: the disk passphrase never
+# enters it (it travels in the SKEIN_LUKS_PASS process environment at
+# install time); the root password arrives as a sha512-crypt hash, so
+# the plaintext exists only in the /run file and in the memory of the two
+# processes that consume it. The write goes to a temporary file and is
+# renamed into place, so a crash mid-write never leaves a truncated
+# document behind for the resume logic.
 save_answers() {
-  {
-    printf 'HOSTNAME=%q\n' "$HOSTNAME"
-    printf 'TIMEZONE=%q\n' "$TIMEZONE"
-    printf 'LOCALE=%q\n' "$LOCALE"
-    printf 'KEYMAPS=(%s)\n' "$(printf ' %q' "${KEYMAPS[@]}")"
-    printf 'DISK=%q\n' "$DISK"
-    printf 'ROOT_SIZE=%q\n' "$ROOT_SIZE"
-  } > "$ANSWERS"
+  local tmp=$ANSWERS.tmp
+  jq -n \
+    --arg hostname "$HOSTNAME" \
+    --arg timezone "$TIMEZONE" \
+    --arg locale "$LOCALE" \
+    --arg disk "$DISK" \
+    --arg root_size "$ROOT_SIZE" \
+    --arg root_password_hash "$ROOT_PW_HASH" \
+    --argjson keymaps "$(printf '%s\n' "${KEYMAPS[@]}" | jq -R . | jq -s .)" \
+    --argjson encrypt true \
+    '{ hostname: $hostname, timezone: $timezone, locale: $locale,
+       keymaps: $keymaps, disk: $disk, root_size: $root_size,
+       encrypt: $encrypt, root_password_hash: $root_password_hash }' \
+    > "$tmp" && mv "$tmp" "$ANSWERS"
+  chmod 600 "$ANSWERS"
+}
+
+# load_answers: restores the variables of a previous session run from the
+# JSON document; used on resume so the wizard never asks a finished step
+# again.
+load_answers() {
+  [ -f "$ANSWERS" ] || return 0
+  eval "$(jq -r '@sh "HOSTNAME=\(.hostname) TIMEZONE=\(.timezone) LOCALE=\(.locale) DISK=\(.disk) ROOT_SIZE=\(.root_size) ROOT_PW_HASH=\(.root_password_hash)"' "$ANSWERS")"
+  mapfile -t KEYMAPS < <(jq -r '.keymaps[]' "$ANSWERS")
 }
 
 # resume_step: the first step whose answers are missing, or 7 (done).
@@ -141,6 +210,9 @@ step_identity() {
   HOSTNAME=$FIELD
   pw_confirm 4 "ROOT PASSWORD" "Password" \
       "This password also unlocks the encrypted disk." || return 1
+  # The plaintext lives in /run (RAM) until the installer consumes it;
+  # only its sha512-crypt hash goes into the answers document.
+  ROOT_PW_HASH=$(openssl passwd -6 "$FIELD")
   (umask 077; printf '%s' "$FIELD" > "$ROOTPW_FILE")
   record 4; save_answers
 }
@@ -175,6 +247,8 @@ step_users() {
       *) break ;;
     esac
   done
+  # The users handover keeps the "username<TAB>password" line format that
+  # the first-boot provisioning service of the installed system reads.
   (umask 077; printf '%s\n' "${entries[@]}" > "$USERS_FILE")
   record 5
 }
@@ -211,55 +285,41 @@ summary() {
     "$(M "$C_GRAY""Enter installs · Ctrl+Left returns to the last step$C_OFF")"
 }
 
-# install_frame TICK: the installation screen with an animated activity bar.
-install_frame() {
-  local t=$(( $1 % 14 )) n bar='' r c
-  for ((n = 0; n < 16; n++)); do
-    if (( (n - t) % 14 < 4 )); then bar+="$C_BLUE▓"; else bar+="$C_GRAY░"; fi
-  done
-  read -r r c < <(tsize)
-  {
-    printf '\033[2J\033[H'
-    printf '%*s%s\n' $(( (c - 2) / 2 )) '' "$C_STAR"
-    printf '%*s%sS K E I N%s\n' $(( (c - 9) / 2 )) '' "$C_B" "$C_OFF"
-    printf '\n'
-    printf '%*s%s\n' $(( (c - 19) / 2 )) '' "$C_B""Installing Skein""$C_OFF"
-    printf '%*s%s%s\n' $(( (c - 32) / 2 )) '' "$bar" "$C_OFF"
-    printf '\n'
-    printf '%*s%s\n' $(( (c - 28) / 2 )) '' "$C_GRAY""Do not turn off the computer""$C_OFF"
-    printf '\n'
-  } >&3
-}
-
-# Runs the disk installer with the three handover inputs; every installer
-# line goes to the install log while the screen shows only the activity bar.
+# Runs the disk installer behind the installation splash: the screen shows
+# the Skein logo and the progress bar while the installer advances it
+# through its phase boundaries, and the wizard does not draw a single
+# character. The answers travel as the JSON document, the disk passphrase
+# in the SKEIN_LUKS_PASS environment variable and the user accounts in the
+# users handover file; every installer line lands in the install log.
 install_system() {
   : > "$LOG"
-  ANSWERS_FILE=$ANSWERS OOBE_ROOTPW_FILE=$ROOTPW_FILE OOBE_USERS_FILE=$USERS_FILE \
+  splash_show
+  ANSWERS_FILE=$ANSWERS \
+  SKEIN_LUKS_PASS=$(cat "$ROOTPW_FILE") \
+  OOBE_USERS_FILE=$USERS_FILE \
     bash /etc/skein/install.sh >> "$LOG" 2>&1 &
-  local pid=$! i=0
-  while kill -0 "$pid" 2>/dev/null; do
-    install_frame "$i"; sleep 0.4; i=$((i + 1))
-  done
-  wait "$pid"; local rc=$?
-  printf '\n' >&3
+  local pid=$! rc
+  while kill -0 "$pid" 2>/dev/null; do sleep 1; done
+  wait "$pid"; rc=$?
+  splash_hide
+  rm -f "$ROOTPW_FILE"
   return "$rc"
 }
 
 # --- main ---------------------------------------------------------------------------------------------
 
 # NAV carries the navigation request out of steps; FIELD a field value;
-# PICK a list choice; PICK_INDEX its item index.
+# PICK a list choice; PICK_INDEX its index inside the item array.
 NAV=next
 
 main() {
   KEYMAPS=()
-  [ -f "$ANSWERS" ] && . "$ANSWERS"
-  : "${HOSTNAME:=}" "${TIMEZONE:=}" "${LOCALE:=}" "${DISK:=}" "${ROOT_SIZE:=}"
+  load_answers
+  : "${HOSTNAME:=}" "${TIMEZONE:=}" "${LOCALE:=}" "${DISK:=}" "${ROOT_SIZE:=}" "${ROOT_PW_HASH:=}"
   if [ "${#KEYMAPS[@]}" -eq 0 ]; then KEYMAPS=(us); fi
   [ -f "$STATE" ] || : > "$STATE"
   # The screen is already black; wait for the terminal geometry to become
-  # final so the very first painted frame stays where it is.
+  # final so the first painted frame stays where it is.
   vt_settle
   local cur gap
   cur=$(resume_step)

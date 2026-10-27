@@ -1,5 +1,5 @@
-Skein
-Copyright (C) 2026-10-25 GUS-Team. All rights reserved.
+[PRODUCT NAME]
+Copyright (C) [YEAR] [AUTHOR NAME]. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -24,11 +24,11 @@ FULL LICENSE TEXT
 ========================================================================
 
 Document: ILL - Modular Lineage License (base license)
-Version: 1.0 (adapted edition, security-corrected 2026-10-25)
-Effective date: 2026-10-25
+Version: 1.0 (adapted edition, security-corrected 2026-10-21)
+Effective date: 2026-10-15
 SPDX-License-Identifier: LicenseRef-ILL-1.0
 
-Corrective revision of 2026-10-25 (corrective, not a new
+Corrective revision of 2026-10-21 (corrective, not a new
 edition; Section 14.2 continues to apply):
   F1 - 10.1: patent license narrowed to the uses permitted
        by the License Stack (no sell/offer for sale absent
@@ -68,6 +68,71 @@ edition; Section 14.2 continues to apply):
        1.11(c); 8.1 requires disclosure of non-waivable
        statutory termination rights (14.3) to commercial
        counterparties.
+
+Corrective revision of 2026-10-25 (corrective, not a new
+edition; Section 14.2 continues to apply):
+  F13 - 1.7, 2: GPL/copyleft adjacency expressly confirmed;
+       interaction with strong-copyleft Third-Party
+       Components through documented public APIs, process
+       boundaries or system calls never subjects such
+       components to ILL and never restricts their own
+       licenses (no "NC leakage" into adjacent GPL works);
+  F14 - 1.8: good-faith recipients relying on the root
+       LICENSE/NOTICE/MODULES files are protected where a
+       contribution is later found unconfirmed;
+  F15 - 9.2: the naming requirement narrowed - prohibition
+       of the Product's own name plus the "based on" notice;
+       mere distinctness of branding is no longer an
+       independent condition;
+  F16 - 1.6: authorship of Modifications is determined in
+       accordance with applicable copyright law;
+  F17 - 6.7: exclusion of a burdensome Module does not affect
+       copies already distributed while the Module was in
+       force;
+  F18 - 15.10: the negotiation period neither suspends the
+       13.1 cure period nor precludes notice of termination.
+
+Corrective revision of 2026-10-25, second batch (corrective,
+not a new edition; Section 14.2 continues to apply):
+  F19 - 4.3, 11.1(c), 13.2, 13.3: internal contradiction
+       resolved - removal/replacement of unconfirmed
+       contributions (1.8) and entries removed under a
+       data-protection order (4.8) are excepted from the
+       no-removal rule; immediate termination for removal or
+       alteration of chain entries/copyright notices is
+       limited to wilful acts or acts not corrected within
+       30 days; inadvertent non-prejudicial alterations are
+       curable and reinstated automatically upon correction;
+  F20 - 10.1: patent license extended to distribution and
+       making available for Non-Commercial Use (the 3.1
+       copyright grant could otherwise be undermined by
+       patents covering the act of distribution); patent
+       license binds successors and assigns of the patents
+       and survives transfer (anti-escape against shell
+       transfers);
+  F21 - 5.2, 6.1: the "no additional conditions" rule
+       clarified - it applies outside the License Stack;
+       Modules under Section 6 are the exclusive vehicle
+       for adding terms;
+  F22 - 7.1(e): source-code offer must indicate the means of
+       access; a written offer may be passed on unchanged by
+       downstream recipients (GPL-style offer propagation),
+       while it remains valid;
+  F23 - 2.3: combination with strong copyleft made operative -
+       each affected Author is deemed to grant the copyleft
+       license for the combined work, instead of a mere
+       declaration that the files "are licensed";
+  F24 - 1.8: recipients who obtained the Product before a
+       chain entry was marked unconfirmed keep their rights;
+  F25 - 10.2: patent retaliation clarified not to apply to
+       assertions concerning only Third-Party Components
+       that do not claim the functionality of the Product.
+  F26 - 7.6: exhaustion / first-sale acknowledgment added
+       (17 U.S.C. Section 109; Article 4(2) of Directive
+       2001/29/EC): alienation of a particular copy is
+       not restricted beyond mandatory law, while the
+       license conditions continue to bind as license
+       terms to the maximum extent permitted.
 
 ================================================================
 PREAMBLE
@@ -111,7 +176,7 @@ HOW TO APPLY
 2. Identify which files are ILL Files. Recommended per-file
    header:
        SPDX-License-Identifier: ILL-1.0
-       Copyright (C) 2026-10-25 GUS-Team
+       Copyright (C) [YEAR] [AUTHOR NAME]
    and/or a per-component list in the NOTICE file. (If
    your compliance tooling requires an SPDX-listed
    identifier, use LicenseRef-ILL-1.0.)
@@ -163,7 +228,8 @@ Author" - an Author who creates a Modification. The
 authorship of a Modification is claimed by the person or
 entity that directs and takes responsibility for the changes;
 the use of software tools, including AI-assisted tools, does
-not by itself create authorship.
+not by itself create or negate authorship, which is determined
+in accordance with applicable copyright law.
 
 1.7. Derivative Work - a work that actually incorporates
 copyright-protected elements of ILL Files (source or object
@@ -194,6 +260,20 @@ fully independent implementation of the same functionality,
 created without access to the source code of the ILL Files,
 is likewise not a Derivative Work.
 
+    Interaction of a Third-Party Component (including a
+component under a strong-copyleft license such as the GNU
+General Public License) with ILL Files solely through
+documented public program interfaces, ordinary process
+boundaries or standard system calls does not make the
+Third-Party Component a Derivative Work of the ILL Files,
+does not subject the Third-Party Component to this License
+in any respect, and does not restrict the exercise of the
+rights granted under the Third-Party Component's own
+license. Nothing in this License may be read as extending
+the Non-Commercial Use restriction, the fee prohibition or
+any other condition of this License to a Third-Party
+Component (see Sections 2.2 and 2.4).
+
 1.8. Authorship Chain - the ordered, cumulative record of
 authorship of the Product and of every Modification of it,
 starting with the Original Author and continuing with every
@@ -218,6 +298,19 @@ from the Product for the purposes of the grants in
 Sections 3 and 10 and must not be distributed as part of
 the Product. The Authors shall, upon discovery,
 promptly remove or replace unconfirmed contributions.
+
+    A recipient who obtained the Product or a Derivative Work
+in compliance with the License Stack as stated in the root
+LICENSE, NOTICE and MODULES files (clause 6.8) is not in
+breach by reason of a contribution later determined to be
+unconfirmed, provided that upon discovery or written notice
+the recipient promptly removes or replaces the unconfirmed
+contribution in all further distributions within the
+recipient's reasonable control. The exclusion of an
+unconfirmed contribution does not affect the rights under
+this License of recipients who obtained the Product or a
+Derivative Work before the chain entry was marked
+unconfirmed, provided they comply with the License Stack.
 
 1.9. Supplemental Terms ("Module") - additional license terms
 attached by an Author to the Product or to specifically
@@ -292,8 +385,8 @@ form, in the preferred form for making modifications,
 including all modules, interface definition files and
 scripts used to control compilation and installation of the
 object code, and the scripts controlling the Product's
-start, provided that such scripts are distributed as part of
-the Product. Source code of Third-Party Components is
+start, provided that such scripts are distributed as part
+of the Product. Source code of Third-Party Components is
 governed by their own licenses.
 
 1.15. Affiliate - an entity that controls, is controlled by,
@@ -343,9 +436,11 @@ under the terms of that copyleft license, subject the ILL
 Files to the copyleft license. Where such a combination
 does, by operation of the copyleft license, extend to the
 combined work, the ILL Files included in that combination
-are, with respect to that combined work, additionally
-licensed under the copyleft license, and the terms of the
-copyleft license prevail to the extent of the conflict.
+are, with respect to that combined work, licensed under
+the copyleft license by each affected Author to the
+extent necessary to comply with that copyleft license,
+and the terms of the copyleft license prevail to the
+extent of the conflict.
 
 2.4. Independent communication between the Product and a
 Third-Party Component through ordinary process boundaries,
@@ -409,7 +504,14 @@ Chain.
 4.3. No removal. No User may remove, alter, obscure or
 truncate any entry of the Authorship Chain or any copyright
 notice or license reference, whether in the original files
-or in any Modification. A change of naming or branding does
+or in any Modification. The preceding sentence does not
+apply to (i) the removal or replacement of an unconfirmed
+contribution or of its chain entry as required by clause
+1.8, and (ii) the removal of a chain entry pursuant to a
+data-protection order under clause 4.8; in both cases the
+order and completeness of the chain are preserved by a
+note recording the removal, in accordance with clause 4.8.
+A change of naming or branding does
 not extinguish the chain: a new name is added on top of the
 chain, never in place of it. Corrections of a chain entry
 are made by an additional entry of the same Author
@@ -481,7 +583,12 @@ states the edition applied.
 sublicense or otherwise make ILL Files available under
 different terms, and no additional condition may be imposed
 that restricts exercise of the rights granted under this
-License. This clause does not apply to Third-Party
+License. The prohibition on additional conditions applies
+to conditions imposed outside the License Stack:
+Supplemental Terms attached in accordance with Section 6
+are the exclusive means of adding conditions to ILL Files,
+and are valid only within the limits of clauses 6.3 and
+6.4. This clause does not apply to Third-Party
 Components, which remain under their own licenses.
 
 5.3. A Modification may be published and distributed
@@ -571,8 +678,8 @@ file together with the copies. A Module not present in the
 MODULES file of a Distribution does not bind recipients of
 that Distribution, and a Module distributed without its
 Author's chain entry is void. A Module, once distributed,
-may not be withdrawn or amended; a correction is made by a
-new Module of the same Author referencing the earlier one
+may not be withdrawn or amended; a correction is made by
+a new Module of the same Author referencing the earlier one
 (clause 4.3).
 
 6.7. Exclusion of burdensome Modules. The Original Author
@@ -585,7 +692,11 @@ its chain entry is preserved, but it does not propagate to
 Distributions made after the exclusion and does not bind
 recipients of those Distributions. The exclusion affects
 only the Module; the base License and all other Modules
-remain in force.
+remain in force. An exclusion under this clause does not
+affect copies and Derivative Works already distributed while
+the excluded Module was in force: recipients of such copies
+remain governed by the License Stack applicable to the copy
+they received.
 
 6.8. Compliance at the level of root files. A recipient may
 rely on the LICENSE, NOTICE and MODULES files at the root of
@@ -625,9 +736,15 @@ subject to mandatory compliance with:
     at the time of distribution of the object code, free of
     charge (subject to clause 7.2), for a period of no less
     than three years from the date of distribution, in the
-    preferred form for making modifications. This
-    obligation also binds commercial licensees, unless the
-    Commercial Agreement provides otherwise;
+    preferred form for making modifications. The offer must
+    indicate the means of access (address or procedure) and
+    remain effective for the stated period; a recipient who
+    received object code together with a written offer valid
+    under this clause satisfies clause 7.1(e) by passing on
+    that offer unchanged, while it remains valid, in place
+    of making a new offer. This obligation also binds
+    commercial licensees, unless the Commercial Agreement
+    provides otherwise;
 (f) distributing under the terms of this License and the
     License Stack, without additional restrictions;
 (g) in a Distribution containing Third-Party Components:
@@ -666,6 +783,18 @@ Distribution of object code of the Product or of a
 Derivative Work triggers clause 7.1(e) in full, and a
 Commercial Agreement may extend or limit the source-code
 obligations of the parties to it.
+
+7.6. Exhaustion and alienation of copies. To the extent
+mandatory law so provides (including 17 U.S.C. Section 109
+and Article 4(2) of Directive 2001/29/EC), the conveyance
+of a copy of the Product does not prevent the further
+alienation of that particular copy, and no condition of
+this License is intended to restrict such alienation. The
+conditions of this License apply as license terms to the
+maximum extent permitted by applicable law; nothing in
+this clause limits the grants in Section 3 or the
+conditions in Sections 4 to 11 for copies that remain
+within the license.
 
 ================================================================
 Section 8. COMMERCIAL USE
@@ -718,12 +847,14 @@ Section 9. NAMES, MARKS AND BRANDING
 trademarks, service marks, logos, trade names or commercial
 designations of the Authors.
 
-9.2. A Derivative Work must bear a name clearly distinct
-from the Product's name and a prominent notice:
+9.2. A Derivative Work must not use the Product's name as
+its own name and must bear a prominent notice:
     "New name" based on "Product name"
 (with the actual names filled in, e.g., AcmeOS Edu based on
 AcmeOS), with the Authorship Chain preserved beneath this
-notice.
+notice. A name that does not suggest official status or
+endorsement (clause 9.3) satisfies this requirement; mere
+distinctness of branding is not an additional condition.
 
 9.3. A Derivative Work must not be presented as an official
 product of the Authors or as endorsed by them.
@@ -735,14 +866,20 @@ Section 10. PATENTS
 10.1. Each Author grants the User a non-exclusive,
 worldwide, royalty-free patent license under patents
 owned or controlled by that Author or its affiliates,
-to make, have made, use and import that Author's ILL
-Files, solely to the extent necessary to exercise the
-rights granted by the License Stack and only for uses
-permitted under the License Stack (Non-Commercial Use,
-or Commercial Use under a valid Commercial Agreement).
-This patent license does not extend to selling, offering
-for sale, or any other act of Commercial Use not covered
-by a Commercial Agreement.
+to make, have made, use, import, distribute and make
+available that Author's ILL Files in any form, solely to
+the extent necessary to exercise the rights granted by
+the License Stack and only for uses permitted under the
+License Stack (Non-Commercial Use, or Commercial Use
+under a valid Commercial Agreement). This patent license
+does not extend to selling, offering for sale, or any
+other act of Commercial Use not covered by a Commercial
+Agreement. This patent license is expressly granted by
+the Author and, to the extent of the licensed patents,
+binds every successor and assign of such patents; it
+survives any transfer of the patents, and no transferee
+may assert the transferred patents against uses licensed
+under this clause.
 
 10.2. Patent retaliation. If the User or its affiliate
 initiates, or knowingly funds or directs, any judicial or
@@ -751,8 +888,12 @@ that the Product or any Derivative Work infringes patent
 rights, all licenses and rights granted to the User under
 this License terminate automatically as of the filing date
 of the Patent Assertion, provided it relates to the
-functionality of the Product or the Derivative Work.
-Termination under this clause applies only to the User on
+functionality of the Product or the Derivative Work. A
+Patent Assertion concerning only a Third-Party Component,
+which does not assert that the functionality of the
+Product or of a Derivative Work infringes a patent, does
+not trigger termination under this clause. Termination
+under this clause applies only to the User on
 whose behalf or under whose control the Patent Assertion is
 made, and does not affect licenses and rights of other
 recipients. The exception is a Patent Assertion filed
@@ -776,7 +917,8 @@ Section 11. PROHIBITED ACTIONS
     including by modifying their operation, intercepting or
     substituting data, or using forged license files;
 (c) remove or alter copyright notices, license references
-    or Authorship Chain entries;
+    or Authorship Chain entries, except as permitted by
+    clause 4.3;
 (d) distribute the Product or Derivative Works under terms
     other than the License Stack;
 (e) impose any technical measure (including encryption,
@@ -851,15 +993,26 @@ the affirmative act described in clause 13.3.
 case of circumvention of technical means of license
 verification, imposition of restricting technical measures
 under clause 11.1(e), or removal or alteration of
-Authorship Chain entries or copyright notices.
+Authorship Chain entries or copyright notices that is
+wilful or is not corrected within 30 days of written
+notice from an affected Author. Removal or alteration of
+Authorship Chain entries or copyright notices that is
+inadvertent and non-prejudicial and is corrected within
+that period is treated as a breach curable under clause
+13.1(b); upon correction notified to the affected Author,
+the rights of the User are reinstated automatically,
+without the written confirmation otherwise required by
+clause 13.3.
 
 13.3. Reinstatement. If the User ceases all violation of
 this License, the rights granted to that User are
 reinstated only upon written confirmation from an affected
 Author; no reinstatement occurs automatically, and the
 rights remain terminated or suspended until reinstated in
-writing. In the cases of clause 13.2, reinstatement is at
-the sole discretion of the affected Author(s) and
+writing. In the cases of clause 13.2 - except an inadvertent
+breach reinstated automatically under the fourth sentence
+of clause 13.2 - reinstatement is at the sole discretion
+of the affected Author(s) and
 additionally requires restoration of the affected notices,
 chain entries and unrestricted copies insofar as they remain
 within the User's reasonable control.
@@ -965,89 +1118,3 @@ only.
     license screen (repository cloning, archive download,
     copy from a third party, or any other means), this
     License is deemed accepted upon first actual use of the
-    ILL Files (copying, modification, building, running).
-    The full text of this License must be placed in the
-    LICENSE file at the root of the repository, and every
-    party further distributing the Product must preserve
-    and pass on the full license text together with the
-    copy.
-
-15.9. This License does not create a partnership, joint
-venture, employment or agency relationship between the
-Authors and the Users.
-
-15.10. Disputes. The parties shall attempt to resolve any
-dispute arising out of this License by negotiation: a
-written claim is answered within 30 calendar days. Failing
-settlement, the dispute is submitted to the competent court
-under the applicable law (clause 15.2). All mandatory
-rights of a natural person acting for consumer purposes
-under the law of that person's habitual residence are
-preserved. Nothing in this clause prevents a party from
-seeking interim, provisional or injunctive relief from a
-competent court where necessary to preserve the Authorship
-Chain or the rights granted under this License. Such relief
-may be sought at any time, including before or during the
-negotiation period, and is not limited to the preservation
-of the Authorship Chain but extends to the prevention of
-Commercial Use without a Commercial Agreement and of the
-removal or alteration of copyright notices or Authorship
-Chain entries.
-
-15.11. Successors and assigns. This License binds and
-benefits the Authors' successors and assigns. A person who
-acquires copyright in ILL Files stands in the Authorship
-Chain in place of the transferring Author for the purposes
-of this License.
-
-15.12. Interpretation. This License is interpreted so as to
-preserve, to the greatest extent permitted: (a) the
-completeness and traceability of the Authorship Chain; (b)
-the separation of Non-Commercial and Commercial Use; (c)
-the validity and enforceability of the License Stack; and
-(d) the rights of recipients who comply with it. Ambiguities
-are not resolved against an Author on the sole ground that
-the Author drafted this License.
-
-================================================================
-Annex 1. EXAMPLES OF COMMERCIAL AND NON-COMMERCIAL USE
-================================================================
-
-(Illustration of clauses 1.11 and 1.12; in case of
-discrepancy the text of clauses 1.11 and 1.12 prevails.)
-
-(1) installation of the Product in a company for internal
-    office tasks: Commercial;
-(2) use of the Product by a freelancer (natural person) in
-    paid client work: Commercial;
-(3) writing a review with a demonstration of the Product
-    without advertising and without remuneration from the
-    manufacturer: NC;
-(4) educational process in a state school: NC;
-(5) use in a university research laboratory, including
-    funded research, if the Product is not used for
-    providing services to third parties and the results do
-    not contain the Product itself: NC;
-(6) use in a non-profit for internal tasks: NC;
-(7) use in a non-profit in providing services to third
-    parties, including for free if it promotes other
-    commercial interests: Commercial;
-(8) demonstration of the Product with advertising
-    monetization of the demonstration itself (blog, video
-    hosting): Commercial; demonstrations covered by the Safe
-    Harbor of clause 1.11(c) remain Non-Commercial;
-(9) use in a state body for performing its public
-    functions: Commercial;
-(10) use of the Product at home for personal purposes
-     without remuneration: NC;
-(11) paid technical support to end users of the Product
-     itself: Commercial;
-(12) development of Modifications and their transfer to the
-     Authors without subsequent distribution: NC;
-(13) publication of a Derivative Work without monetization:
-     NC;
-(14) non-commercial hosting of the Product or a Derivative
-     Work, with free access and without advertising or
-     promotion of commercial interests: NC;
-(15) embedding the Product in a crowdfunding campaign or a
-     paid course: Commercial.

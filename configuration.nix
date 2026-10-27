@@ -4,6 +4,26 @@
 # and are overridden by the generated local.nix.
 { config, pkgs, lib, ... }:
 
+let
+  # One-shot boot probe: writes the exact kernel command line, the loaded
+  # DRM modules, the DRM device nodes and every Plymouth/DRM journal line
+  # of the current boot to the serial port. The installer image is
+  # debugged through the serial log, and this probe is the single place
+  # that answers why the graphical boot animation does or does not appear.
+  bootDiagnostics = pkgs.writeShellScript "skein-boot-diagnostics" ''
+    exec > /dev/ttyS0 2>&1
+    echo "=== skein boot diagnostics: begin ==="
+    echo "--- kernel command line:"
+    cat /proc/cmdline
+    echo "--- loaded drm/gpu modules:"
+    lsmod | grep -iE 'virtio_gpu|bochs|vmwgfx|drm' || echo "(no drm module loaded)"
+    echo "--- drm device nodes:"
+    ls -l /dev/dri 2>&1 || true
+    echo "--- plymouth/drm journal lines:"
+    journalctl -b -o cat --no-pager | grep -iE 'plymouth|drm|virtio_gpu' | tail -n 40 || true
+    echo "=== skein boot diagnostics: end ==="
+  '';
+in
 {
   # The installer generates hardware-configuration.nix, installed-boot.nix
   # and local.nix next to this file on the installed system; during the ISO
@@ -21,6 +41,16 @@
   # mainline kernel ABI, so every module and driver of the system keeps
   # working unchanged.
   boot.kernelPackages = pkgs.linuxPackages_zen;
+
+  # The display driver modules must exist in the initrd, not only in the
+  # final system: Plymouth starts inside the initrd, and without these
+  # modules it finds no DRM device, silently falls back to the text
+  # console and every status line becomes visible on the screen. The
+  # list covers the virtual GPUs of common hypervisors (virtio-vga,
+  # std-vga/bochs, vmware); on hardware without these devices the
+  # modules find nothing and the native GPU driver takes over later in
+  # the boot.
+  boot.initrd.kernelModules = [ "virtio_gpu" "bochs" "vmwgfx" ];
 
   # Firmware, microcode and driver blobs carry unfree licenses (Broadcom,
   # Intel, Realtek, Apple, NVIDIA, ...). Skein ships them deliberately;
@@ -60,24 +90,17 @@
   # login is enforced by that service as well.
 
   # Silent boot of every Skein system, installed machines included. The
-  # machine's own screen stays silent until the greeter: splash activates
-  # the Plymouth theme, quiet and the show_status pair keep every status
-  # line off the screen, loglevel=3 and the udev log levels keep kernel
-  # and udev chatter below warning level, vt.global_cursor_default=0 hides
-  # the blinking cursor block.
-  #
-  # The FIRST console is the serial port: /dev/console (kernel messages,
-  # emergency shells, everything journald forwards) goes to ttyS0 and
-  # nowhere else. The screen is not a console at all. A machine without a
-  # connected serial cable loses nothing - the writes are discarded by the
-  # UART - while any supervisor (QEMU with "-serial file:", a serial
-  # logger on real hardware) receives the complete boot log as a file on
-  # the host. This is the error-tracing channel of the system.
+  # screen belongs to the boot animation and the wizard; the serial port
+  # is the diagnostic channel. tty0 is a kernel console purely so the
+  # framebuffer text console initializes and the wizard can paint the
+  # screen; printk is gated to emergency level, so nothing from the kernel
+  # reaches the display.
   boot.kernelParams = [
     "console=ttyS0,115200n8"
+    "console=tty0"
     "splash"
     "quiet"
-    "loglevel=3"
+    "loglevel=0"
     "rd.systemd.show_status=false"
     "systemd.show_status=false"
     "rd.udev.log_level=3"
@@ -85,15 +108,41 @@
     "vt.global_cursor_default=0"
   ];
 
-  # The kernel printk console level: 3 shows warnings and errors only.
-  boot.consoleLogLevel = 3;
+  # The kernel printk console level: 0 forwards only emergency messages,
+  # keeping even error-level kernel chatter off the screen.
+  boot.consoleLogLevel = 0;
 
-  # journald forwards every log line to the system console, which is the
-  # serial port (see boot.kernelParams): the full boot and runtime journal
-  # is mirrored to whatever listens on the other end of the line, while
-  # the on-disk journal in /var/log/journal remains the primary store.
-  services.journald.settings.Journal = {
-    ForwardToConsole = true;
+  # The serial port is the only diagnostic channel, and it is fed
+  # directly: a dedicated service streams the live journal straight into
+  # /dev/ttyS0, including the last 400 lines of the current boot, so the
+  # early boot messages of every daemon (Plymouth included) are visible
+  # even though they precede the service start. Journald's own console
+  # forwarding is deliberately left off, because /dev/console fans writes
+  # out to every registered console, which would put the full journal
+  # (and every error in it) on the screen.
+  systemd.services.skein-serial-journal = {
+    description = "Mirror the boot journal to the serial debug port";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-journald.service" ];
+    serviceConfig = {
+      ExecStart = "/bin/sh -c 'exec ${pkgs.systemd}/bin/journalctl -f -n 400 -o short-precise > /dev/ttyS0'";
+      Restart = "always";
+      RestartSec = "1s";
+    };
+  };
+
+  # Boot probe (see the let binding above): runs once per boot right
+  # after the journal mirror starts and dumps the display-boot facts to
+  # the serial port. It exists to make the graphical boot debuggable
+  # from the serial log alone.
+  systemd.services.skein-boot-diagnostics = {
+    description = "Log boot display diagnostics to the serial debug port";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-journald.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${bootDiagnostics}";
+    };
   };
 
   # Time, locale and console defaults; the OOBE wizard replaces them in

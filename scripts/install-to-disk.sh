@@ -4,6 +4,8 @@
 # Destructively installs Skein onto a whole disk: a 1 GiB EFI system
 # partition and one btrfs system partition holding subvolumes @, @home,
 # @var, @snapshots and @swap, the system partition inside a LUKS2 volume.
+# The system partition takes a fixed comfortable size (like a factory
+# Windows install) and the rest of the disk stays unallocated.
 #
 # Inputs (OOBE mode):
 #   ANSWERS_FILE        JSON document with the collected settings
@@ -11,18 +13,22 @@
 #   SKEIN_LUKS_PASS     LUKS passphrase, passed in memory only; the
 #                       installer consumes it for luksFormat/luksOpen and
 #                       never writes it to any file.
-#   OOBE_USERS_FILE     plain list of user names, one per line; the
+#   OOBE_USERS_FILE     list of "username<TAB>password" lines; the
 #                       accounts receive their passwords at first login.
 #
 # The root account password travels as a sha512-crypt hash inside the JSON
 # document and lands in local.nix as users.users.root.hashedPassword; the
 # plaintext never exists on disk. In standalone mode every value is asked
 # on the terminal and the hash is computed locally (openssl passwd -6).
+#
+# The full trace goes to the serial debug port directly: /dev/console fans
+# writes out to every registered console, which would put the raw trace on
+# the visible screen during the installation.
 set -Eeuo pipefail
 
 # The trace channel: fd 19 is the serial console, so the full trace of
-# every installer line lands in the host-side log.
-exec 19>/dev/console
+# every installer line lands in the host-side log and never on the screen.
+exec 19>/dev/ttyS0
 BASH_XTRACEFD=19
 PS4='+$(date "+%H:%M:%S") ${BASH_SOURCE[0]##*/}:${LINENO}: '
 set -x
@@ -35,6 +41,16 @@ export NIX_CONFIG="experimental-features = nix-command flakes"
 
 log() { printf 'skein-install: %s\n' "$*" >&2; }
 
+# splash_progress PERCENT: advances the progress bar of the Plymouth
+# animation the wizard raised for the installation; every failure mode
+# (missing client, inactive daemon, unsupported command) degrades to a
+# no-op so the installer never depends on the splash.
+splash_progress() {
+  command -v plymouth >/dev/null 2>&1 || return 0
+  plymouth --ping >/dev/null 2>&1 || return 0
+  plymouth system-update --progress "$1" >/dev/null 2>&1 || true
+}
+
 # The error trap names the exact failing line and command on the trace
 # channel; the wizard surfaces the same information on the screen.
 trap 'rc=$?; set +x; printf "skein-install: FAIL line %s exit %s: %s\n" "$LINENO" "$rc" "$BASH_COMMAND" >&2; exit "$rc"' ERR
@@ -42,9 +58,8 @@ trap 'rc=$?; set +x; printf "skein-install: FAIL line %s exit %s: %s\n" "$LINENO
 # ---- inputs -----------------------------------------------------------------
 
 if [ -n "${ANSWERS_FILE:-}" ] && [ -f "$ANSWERS_FILE" ]; then
-  # OOBE mode: the GUI wizard collected everything; consent is the wizard's
+  # OOBE mode: the wizard collected everything; consent is the wizard's
   # summary screen. The answers arrive as JSON; jq is the parser.
-  . /dev/null # no-op keeps the two branches symmetric for the trace
   USERS_SOURCE="${OOBE_USERS_FILE:?users handover file missing}"
   ENCRYPT=yes
   # The passphrase lives only in this process environment; it is consumed
@@ -126,14 +141,18 @@ if [ ! -d /sys/firmware/efi ]; then
   log "WARNING: no UEFI firmware detected; the installed system boots only on UEFI machines."
 fi
 
-# Resolve the system partition size in bytes.
+# Resolve the system partition size in bytes. Windows-style sizing: the
+# system partition always takes a fixed comfortable size for the OS, its
+# package store and retained update generations, and the rest of the disk
+# stays unallocated for the user to claim later. Small disks give the
+# system a quarter instead, so USB sticks and VM test disks stay useful.
 DISK_BYTES=$(lsblk -bdno SIZE "$DISK")
 ESP_BYTES=$((1025 * 1024 * 1024))
 case "$ROOT_SIZE" in
-  auto)   if [ "$DISK_BYTES" -lt $((320 * 1024 * 1024 * 1024)) ]; then
+  auto)   if [ "$DISK_BYTES" -lt $((128 * 1024 * 1024 * 1024)) ]; then
             ROOT_BYTES=$((DISK_BYTES / 4))
           else
-            ROOT_BYTES=$((80 * 1024 * 1024 * 1024))
+            ROOT_BYTES=$((64 * 1024 * 1024 * 1024))
           fi ;;
   max)    ROOT_BYTES=$((DISK_BYTES - ESP_BYTES)) ;;
   ''|*[!0-9]*) { log "invalid ROOT_SIZE '$ROOT_SIZE'"; exit 1; } ;;
@@ -145,6 +164,7 @@ ROOT_END=$((ESP_BYTES + ROOT_BYTES))
 
 # ---- partitioning -----------------------------------------------------------
 
+splash_progress 10
 log "partitioning $DISK (ESP 1 GiB + system $(numfmt --to=iec "$ROOT_BYTES"))"
 parted -s --align optimal "$DISK" mklabel gpt
 parted -s --align optimal "$DISK" mkpart SKEIN-BOOT fat32 1MiB 1025MiB
@@ -174,6 +194,7 @@ else
   BTRFS_DEV=$ROOT_PART
 fi
 unset ROOTPW
+splash_progress 30
 
 # ---- btrfs layout --------------------------------------------------------------
 
@@ -198,6 +219,7 @@ chattr +C /mnt/swap
 btrfs filesystem mkswapfile --size 2g /mnt/swap/swapfile
 chmod 600 /mnt/swap/swapfile
 swapon /mnt/swap/swapfile
+splash_progress 40
 
 # ---- NixOS configuration of the installed system --------------------------------
 
@@ -247,6 +269,7 @@ sed -i -e '/boot.initrd.luks/d' "$TARGET/hardware-configuration.nix"
   fi
   printf '}\n'
 } > "$TARGET/local.nix"
+splash_progress 55
 
 # ---- build phase -----------------------------------------------------------------
 
@@ -257,9 +280,13 @@ swapon /mnt/swap/swapfile.build
 
 # Offline preflight: build the exact system closure of the target flake
 # against the live store; a failure here aborts before nixos-install. The
-# full nix output is captured, so the failure reason is visible on the
-# wizard's failure screen and in the serial log.
+# installer image ships the source trees of every locked flake input in
+# its store (system.extraDependencies in iso/iso.nix), so the offline
+# evaluation resolves the inputs without any download. The full nix
+# output is captured, so the failure reason is visible on the wizard's
+# failure screen and in the serial log.
 log "preflight: building the system closure offline"
+splash_progress 70
 if ! nix build --offline --no-link "$TARGET#nixosConfigurations.skein.config.system.build.toplevel" \
     > /tmp/skein-preflight.log 2>&1; then
   log "preflight build failed; the last lines of the nix output follow:"
@@ -268,13 +295,15 @@ if ! nix build --offline --no-link "$TARGET#nixosConfigurations.skein.config.sys
 fi
 
 log "running nixos-install"
+splash_progress 80
 nixos-install --flake "$TARGET#skein" --no-root-passwd
+splash_progress 95
 
 # ---- first-boot provisioning handover --------------------------------------------
 
 # The provisioning service of the installed system reads these files on
-# first boot and deletes them afterwards. The users file carries names
-# only; passwords are set by each user at first login.
+# first boot and deletes them afterwards. The users file keeps the
+# "username<TAB>password" line format its provisioning service reads.
 install -m 600 "$USERS_SOURCE" /mnt/etc/skein/homed-users
 touch /mnt/etc/skein/firstboot
 
@@ -285,5 +314,6 @@ rm -f /mnt/swap/swapfile.build
 swapoff /mnt/swap/swapfile
 sync
 umount -R /mnt
+splash_progress 100
 
 log "installation finished"

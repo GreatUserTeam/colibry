@@ -41,6 +41,7 @@
         ./modules/plymouth.nix
         ./modules/greeter.nix
         ./modules/security.nix
+        ./modules/integrity.nix
         ./modules/apparmor.nix
         ./modules/encryption.nix
         ./modules/sandbox.nix
@@ -54,12 +55,22 @@
         ./modules/recoll.nix
         ./modules/updates.nix
       ];
+
+      # The installer image must carry the source trees of every locked
+      # flake input in its store: the installer evaluates and builds the
+      # target system offline against the live store, and offline
+      # evaluation resolves the inputs only when their exact store paths
+      # already exist. The fetched input trees are evaluation-time-only
+      # dependencies, so nothing pulls them into the image automatically.
+      installerArgs = {
+        inherit nixpkgs nixpak nix-software-center helium;
+      };
     in
     {
       # The distribution is exposed as a single installable NixOS system.
       nixosConfigurations.skein = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit nixpak nix-software-center helium; };
+        specialArgs = installerArgs;
         modules = skeinModules;
       };
 
@@ -67,10 +78,11 @@
       # the silent UEFI boot image and the wizard helper libraries.
       nixosConfigurations.skein-iso = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit nixpak nix-software-center helium; };
+        specialArgs = installerArgs;
         modules = skeinModules ++ [
           ./iso/iso.nix
           ./iso/efi-image.nix
+          ./iso/oobe-session.nix
           ./iso/oobe-files.nix
         ];
       };

@@ -1,5 +1,5 @@
-Skein
-Copyright (C) 2026-10-25 GUS-Team. All rights reserved.
+Colibry
+Copyright (C) 26-10-26 GUSTeam. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -20,22 +20,22 @@ additional entries referencing the corrected ones (ILL 4.3).
 ----------------------------------------------------------------
 Chain entry 1 - Original Author
 ----------------------------------------------------------------
-- Author:        GUS-Team
-- Date/Version:  2026-10-25 / 0.0.3
-- Changes:       Initial release of Skein:
+- Author:        GUSTeam
+- Date/Version:  26-10-26 / 0.0.5
+- Changes:       Initial release of Colibry:
                  A security-first NixOS-based
-                 Linux distribution (codename "Spark") with a
-                 graphical out-of-box-experience installer,
+                 Linux distribution with a graphical
+                 out-of-box-experience installer,
                  Plymouth boot theme, btrfs/LUKS2-based
                  installation flow and a curated desktop
                  application set.
-- Contact:       info@gusteam.net / skein.gusteam.net
+- Contact:       info@gusteam.net / https://colibry.gusteam.net
 
 ----------------------------------------------------------------
-Chain entry N - GUS-Team
+Chain entry N - GUSTeam
 ----------------------------------------------------------------
-- Author:        GUS-Team
-- Date/Version:  2026-10-25 / 0.0.3
+- Author:        GUSTeam
+- Date/Version:  26-10-26 / 0.0.5
 - Changes:       Installer bring-up: silent UEFI boot image
                  (iso/efi-image.nix, iso/oobe-files.nix); OOBE wizard
                  split into session/terminal/widget libraries
@@ -44,7 +44,7 @@ Chain entry N - GUS-Team
                  tooling (build.sh, run.sh) with self-describing serial
                  logs; kernel-module packaging fix in modules/packages.nix.
 - Status:        confirmed | unconfirmed (ILL 1.8)
-- Contact:       info@gusteam.net / skein.gusteam.net
+- Contact:       info@gusteam.net / https://colibry.gusteam.net
 
 ================================================================
 2. COMMERCIAL RIGHTSHOLDER (ILL Section 8.2)
@@ -53,9 +53,9 @@ Chain entry N - GUS-Team
 For ALL ILL Files of this Product, unless a more specific
 designation is listed below, the Commercial Rightsholder is:
 
-    GUS-Team
+    GUSTeam
 
-Contact for Commercial Agreements: info@gusteam.net / skein.gusteam.net
+Contact for Commercial Agreements: info@gusteam.net / https://colibry.gusteam.net
 
 Component-specific designations (if any):
 
@@ -90,11 +90,17 @@ restriction and the fee prohibition - do not apply to them.
 4. OTHER NOTICES
 ================================================================
 
-- Trademarks: "Skein" are product names and marks of GUS-Team;
-  they are not licensed by ILL (Section 9).
-- Official repository: https://github.com/aiv-tmc/skein (see CONTRIBUTING)
+- Trademarks: "Colibry" are product names and marks of GUSTeam;
+  they are not licensed by ILL ()Section 9).
+- Official repository: https://github.com/aiv-tmc/colibry (see CONTRIBUTING)
 - Modules (Supplemental Terms): see the MODULES file at the
   repository root; a Module not listed there does not bind
   recipients of a Distribution (ILL 6.6).
+- Copyleft adjacency (ILL 1.7, 2.2, 2.4, corrective revision
+  F13 of 2026-10-25): interaction of GPL-licensed or other
+  strong-copyleft Third-Party Components with the ILL Files
+  solely through documented public APIs, ordinary process
+  boundaries or standard system calls does not subject those
+  components to ILL and does not restrict their own licenses.
 
-Questions: info@Supplemental.net.
+Questions: info@gusteam.net.

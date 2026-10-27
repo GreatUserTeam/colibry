@@ -1,0 +1,32 @@
+[PRODUCT NAME] - MODULES
+SPDX-License-Identifier: LicenseRef-ILL-1.0
+
+ILL - Modular Lineage License, version 1.0 (adapted)
+
+This file collects all Modules (Supplemental Terms) attached
+under ILL Section 6, one Module per block, each referencing
+its Author's chain entry (ILL 6.6).
+
+================================================================
+MODULES
+================================================================
+
+This Product currently has NO Modules (Supplemental Terms).
+
+Per ILL 6.6, a Module that is not listed in this file does not
+bind recipients of a Distribution. If a Module is attached in
+the future, add it below in the following form:
+
+----------------------------------------------------------------
+Module 1 - [Name or stable pseudonym]
+----------------------------------------------------------------
+- Author (chain entry):  [reference to NOTICE chain entry]
+- Date of attachment:    [DATE]
+- Scope:                 [specific files or additions]
+- Text:                  [the Supplemental Terms]
+
+Validity conditions: ILL 6.3 and 6.4 (a Module may only add
+terms; it must not contradict the base License or any previous
+Module, must not grant Commercial Use rights, must not impose
+fees or field-of-use/ethical-use/visible-attribution
+conditions on Non-Commercial use).
