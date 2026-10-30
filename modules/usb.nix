@@ -1,4 +1,4 @@
-# USB removable media module of Skein.
+# USB removable media module of Colibry.
 # A single policy governs every USB storage device, whether it was plugged
 # in before power-on or hot-plugged later: mount read-only + noexec, scan
 # it with ClamAV, notify the user on detection, and unmount it after ten
@@ -8,21 +8,21 @@
 
 let
   # Notifies the human user over the session D-Bus; used for USB events.
-  notifyUser = pkgs.writeShellScript "skein-notify-user" ''
+  notifyUser = pkgs.writeShellScript "colibry-notify-user" ''
     MSG="''${1:?notification text}"
-    USER="skeinuser"
+    USER="colibryuser"
     UID_=$(${pkgs.coreutils}/bin/id -u "$USER" 2>/dev/null) || exit 0
     BUS="/run/user/$UID_/bus"
     [ -S "$BUS" ] || exit 0
     ${pkgs.util-linux}/bin/runuser -u "$USER" -- \
       env DBUS_SESSION_BUS_ADDRESS="unix:path=$BUS" \
           XDG_RUNTIME_DIR="/run/user/$UID_" \
-      ${pkgs.libnotify}/bin/notify-send -u critical "Skein USB guard" "$MSG" || true
+      ${pkgs.libnotify}/bin/notify-send -u critical "Colibry USB guard" "$MSG" || true
   '';
 
   # Policy mount: read-only, noexec, nosuid, nodev; then a background
   # ClamAV scan decides whether the device may stay.
-  skeinUsbMount = pkgs.writeShellScript "skein-usb-mount" ''
+  colibryUsbMount = pkgs.writeShellScript "colibry-usb-mount" ''
     set -u
     DEV="''${1:?kernel device name required}"   # e.g. sda1
     [ -b "/dev/$DEV" ] || exit 0
@@ -45,13 +45,13 @@ let
       MNT="$BASE-$N"; N=$((N + 1))
     done
 
-    ${pkgs.coreutils}/bin/mkdir -p "$MNT" /run/skein-usb
+    ${pkgs.coreutils}/bin/mkdir -p "$MNT" /run/colibry-usb
     # The policy mount options: no writes, no execution, no suid, no devices.
     if ! ${pkgs.util-linux}/bin/mount -o ro,noexec,nosuid,nodev "/dev/$DEV" "$MNT" 2>/dev/null; then
       ${notifyUser} "USB device $DEV could not be mounted."
       exit 0
     fi
-    ${pkgs.coreutils}/bin/touch "/run/skein-usb/$(basename "$MNT").stamp"
+    ${pkgs.coreutils}/bin/touch "/run/colibry-usb/$(basename "$MNT").stamp"
     ${notifyUser} "USB device mounted read-only at $MNT. Scanning..."
 
     # The background scan removes an infected mount; exit code 2 means the
@@ -71,19 +71,19 @@ let
   '';
 
   # Reverses the policy mount; run when the device disappears or idles out.
-  skeinUsbUnmount = pkgs.writeShellScript "skein-usb-unmount" ''
+  colibryUsbUnmount = pkgs.writeShellScript "colibry-usb-unmount" ''
     set -u
     DEV="''${1:?kernel device name required}"
     MNT=$(${pkgs.util-linux}/bin/findmnt -rn -S "/dev/$DEV" -o TARGET | ${pkgs.coreutils}/bin/head -n1)
     [ -n "$MNT" ] || exit 0
     ${pkgs.util-linux}/bin/umount "$MNT" 2>/dev/null || \
       ${pkgs.util-linux}/bin/umount -l "$MNT" 2>/dev/null || true
-    ${pkgs.coreutils}/bin/rm -f "/run/skein-usb/$(basename "$MNT").stamp"
+    ${pkgs.coreutils}/bin/rm -f "/run/colibry-usb/$(basename "$MNT").stamp"
   '';
 
   # Unmounts every policy mount that has had no open files for 10 minutes.
-  skeinUsbIdle = pkgs.writeShellScript "skein-usb-idle-unmount" ''
-    for stamp in /run/skein-usb/*.stamp; do
+  colibryUsbIdle = pkgs.writeShellScript "colibry-usb-idle-unmount" ''
+    for stamp in /run/colibry-usb/*.stamp; do
       [ -e "$stamp" ] || continue
       MNT="/media/$(basename "$stamp" .stamp)"
       # Device already gone: drop the stale stamp.
@@ -111,7 +111,7 @@ in
   # UDisks2 stays active: the file manager lists devices and offers
   # "Safely Remove". COSMIC Files performs no automounting, so udisks2 by
   # itself never mounts a device; the only automatic mounts on the system
-  # are the Skein policy mounts below, which always carry the security
+  # are the Colibry policy mounts below, which always carry the security
   # options.
   services.udisks2 = {
     enable = true;
@@ -125,35 +125,35 @@ in
   # cold path and the hot path are identical. The rules travel through
   # services.udev.extraRules because the udev module owns the merged
   # rules directory and individual files cannot be added next to it.
-  # In paranoid USB mode (skein.usbParanoid = true) nothing mounts
+  # In paranoid USB mode (colibry.usbParanoid = true) nothing mounts
   # automatically and these rules are not installed at all.
-  services.udev.extraRules = lib.mkIf (!config.skein.usbParanoid) ''
-    ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{DEVTYPE}=="partition", TAG+="systemd", ENV{SYSTEMD_WANTS}="skein-usb-mount@%k.service"
-    ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{DEVTYPE}=="disk", ENV{ID_FS_USAGE}=="filesystem", TAG+="systemd", ENV{SYSTEMD_WANTS}="skein-usb-mount@%k.service"
+  services.udev.extraRules = lib.mkIf (!config.colibry.usbParanoid) ''
+    ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{DEVTYPE}=="partition", TAG+="systemd", ENV{SYSTEMD_WANTS}="colibry-usb-mount@%k.service"
+    ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{DEVTYPE}=="disk", ENV{ID_FS_USAGE}=="filesystem", TAG+="systemd", ENV{SYSTEMD_WANTS}="colibry-usb-mount@%k.service"
   '';
 
   # The per-device mount unit: bound to the device node, it unmounts the
   # filesystem automatically the moment the stick is pulled out.
-  systemd.services."skein-usb-mount@" = {
-    description = "Skein policy mount of USB device %I";
+  systemd.services."colibry-usb-mount@" = {
+    description = "Colibry policy mount of USB device %I";
     after = [ "dev-%i.device" ];
     unitConfig.BindsTo = "dev-%i.device";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${skeinUsbMount} %i";
-      ExecStop = "${skeinUsbUnmount} %i";
+      ExecStart = "${colibryUsbMount} %i";
+      ExecStop = "${colibryUsbUnmount} %i";
     };
   };
 
   # The idle watchdog: every minute it unmounts devices that had no open
   # file for ten consecutive minutes.
-  systemd.services.skein-usb-idle-unmount = {
+  systemd.services.colibry-usb-idle-unmount = {
     description = "Unmount idle USB policy mounts";
     serviceConfig.Type = "oneshot";
-    serviceConfig.ExecStart = "${skeinUsbIdle}";
+    serviceConfig.ExecStart = "${colibryUsbIdle}";
   };
-  systemd.timers.skein-usb-idle-unmount = {
+  systemd.timers.colibry-usb-idle-unmount = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "2min";

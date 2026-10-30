@@ -1,4 +1,4 @@
-# Recoll: the file indexing and full-text search layer of Skein, in the
+# Recoll: the file indexing and full-text search layer of Colibry, in the
 # role macOS assigns to Spotlight. Two pieces make the role real:
 #  * the recoll package (GUI + indexer), available to every user;
 #  * a per-user systemd service running "recollindex -m", the continuous

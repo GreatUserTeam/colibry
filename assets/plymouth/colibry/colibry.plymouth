@@ -1,0 +1,12 @@
+[Plymouth Theme]
+Name=Colibry
+Description=Colibry boot splash: black screen, centered logo, no text
+ModuleName=script
+
+[script]
+# The @themeDir@ placeholder is baked to the final store path by the
+# theme derivation at image build time, so the descriptor always names
+# paths that exist in the store of the running system.
+ImageDir=@themeDir@
+ScriptDir=@themeDir@
+ScriptFile=@themeDir@/colibry.script

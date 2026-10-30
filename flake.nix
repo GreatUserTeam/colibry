@@ -1,8 +1,8 @@
-# Flake entry point for the Skein NixOS distribution.
-# This file pins all inputs, exposes the NixOS system "skein", and defines
+# Flake entry point for the Colibry NixOS distribution.
+# This file pins all inputs, exposes the NixOS system "colibry", and defines
 # the build apps: the installed system and the installer ISO.
 {
-  description = "Skein — a security-first NixOS distribution for people who don't want to think about computers.";
+  description = "Colibry — a security-first NixOS distribution for people who don't want to think about computers.";
 
   inputs = {
     # NixOS unstable is pinned to a known-good revision.
@@ -33,9 +33,9 @@
       # System architecture is fixed to x86_64 for the first prototype.
       system = "x86_64-linux";
 
-      # All Skein system modules are shared by the installed system and the
+      # All Colibry system modules are shared by the installed system and the
       # installer ISO, so the live session behaves exactly like the target.
-      skeinModules = [
+      colibryModules = [
         ./configuration.nix
         ./modules/identity.nix
         ./modules/plymouth.nix
@@ -68,18 +68,18 @@
     in
     {
       # The distribution is exposed as a single installable NixOS system.
-      nixosConfigurations.skein = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.colibry = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = installerArgs;
-        modules = skeinModules;
+        modules = colibryModules;
       };
 
       # The installer ISO is the same system plus the live-session module,
       # the silent UEFI boot image and the wizard helper libraries.
-      nixosConfigurations.skein-iso = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.colibry-iso = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = installerArgs;
-        modules = skeinModules ++ [
+        modules = colibryModules ++ [
           ./iso/iso.nix
           ./iso/efi-image.nix
           ./iso/oobe-session.nix
@@ -88,14 +88,14 @@
       };
 
       # The ISO image is exposed as a buildable package.
-      packages.${system}.skein-iso =
-        self.nixosConfigurations.skein-iso.config.system.build.isoImage;
+      packages.${system}.colibry-iso =
+        self.nixosConfigurations.colibry-iso.config.system.build.isoImage;
 
       # "nix run .#build" builds the ISO.
       apps.${system}.build = {
         type = "app";
-        program = toString (nixpkgs.legacyPackages.${system}.writeShellScript "skein-build" ''
-          nix build ${self}#packages.${system}.skein-iso --out-link result
+        program = toString (nixpkgs.legacyPackages.${system}.writeShellScript "colibry-build" ''
+          nix build ${self}#packages.${system}.colibry-iso --out-link result
           echo "ISO ready:"
           ls -lh result/iso
         '');

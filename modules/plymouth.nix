@@ -1,49 +1,48 @@
-# Plymouth module of Skein.
-# The boot splash is a fully custom theme: a black screen, the Skein logo
-# centered, and a thin progress bar at the bottom edge in place of boot
-# messages. The artwork ships as SVG sources; the theme derivation renders
-# them to PNG, because Plymouth loads PNG images only.
+# Plymouth boot splash of the Colibry distribution.
+#
+# This module assembles the Colibry splash theme from the sources in
+# ../assets/plymouth/colibry/ and registers it as the boot splash of
+# every Colibry system. For the entire boot the screen shows a black
+# background with the white Colibry logo centered on it and nothing
+# else: no firmware text, no console output and no status messages can
+# bleed through, because Plymouth owns the framebuffer and the theme
+# draws a full-screen black stage. Disk encryption passphrases are
+# entered as pixel dots on the same stage.
 { config, pkgs, lib, ... }:
 
 let
-  # The Skein Plymouth theme ships its script and the SVG artwork; the
-  # descriptor is generated here. rsvg-convert (shipped in librsvg)
-  # rasterizes the artwork to PNG during the build, so the runtime theme
-  # directory contains only files Plymouth can load.
-  skeinTheme = pkgs.runCommand "skein-plymouth-theme"
-    { nativeBuildInputs = [ pkgs.librsvg ]; }
-    ''
-      themeDir=$out/share/plymouth/themes/skein
-      mkdir -p $themeDir
+  # Theme sources: the splash script, the theme descriptor template and
+  # the logo artwork. Everything the boot screen shows is defined by
+  # these files alone.
+  themeSrc = ../assets/plymouth/colibry;
 
-      # The artwork sources keep their directory names on disk; only the
-      # installed theme is renamed.
-      cp ${../assets/plymouth/spark/spark.script} $themeDir/skein.script
-      rsvg-convert -w 256 ${../assets/plymouth/spark/logo.svg} -o $themeDir/logo.png
-      rsvg-convert ${../assets/plymouth/spark/bar.svg}     -o $themeDir/bar.png
-      rsvg-convert ${../assets/plymouth/spark/bar-dim.svg} -o $themeDir/bar-dim.png
+  # The finished theme directory as Plymouth expects it:
+  # share/plymouth/themes/colibry/ holding the descriptor, the script
+  # and the rasterized logo. The SVG is rendered here, at image build
+  # time, so the booted system carries only ready pixels.
+  theme = pkgs.runCommand "colibry-plymouth-theme" {
+    nativeBuildInputs = [ pkgs.librsvg ];
+  } ''
+    themeDir=$out/share/plymouth/themes/colibry
+    mkdir -p "$themeDir"
 
-      # Fill the ImageDir and ScriptFile placeholders with the path of this
-      # very derivation. Plymouth resolves the descriptor paths literally,
-      # and the NixOS Plymouth module rewrites store paths inside the
-      # descriptor when it copies the theme into the initrd; a path outside
-      # the store would survive the rewrite but would not exist at boot,
-      # leaving Plymouth with no images and a plain gray screen.
-      substitute ${../assets/plymouth/spark/spark.plymouth} $themeDir/skein.plymouth \
-        --replace-fail @themeDir@ "$themeDir"
-    '';
+    # Rasterize the logo at its natural size (256x256 white star).
+    rsvg-convert ${themeSrc}/logo.svg -o "$themeDir/logo.png"
+
+    install -m 0644 ${themeSrc}/colibry.script "$themeDir/colibry.script"
+
+    # Bake the store path into the descriptor so Plymouth resolves the
+    # artwork directory without any runtime search.
+    sed "s|@themeDir@|$themeDir|g" ${themeSrc}/colibry.plymouth \
+      > "$themeDir/colibry.plymouth"
+  '';
 in
 {
-  # The splash starts with the initrd itself: the systemd-based stage 1
-  # starts Plymouth before any userspace job runs, so the screen shows
-  # the Skein logo from the first second of the boot instead of a black
-  # gap between the firmware and the desktop stage.
-  boot.initrd.systemd.enable = true;
-
-  # Plymouth draws the splash; the Skein theme replaces the default one.
+  # The graphical splash on every boot; the theme package carries the
+  # descriptor, so the script plugin resolves entirely from the Nix store.
   boot.plymouth = {
     enable = true;
-    theme = "skein";
-    themePackages = [ skeinTheme ];
+    theme = "colibry";
+    themePackages = [ theme ];
   };
 }

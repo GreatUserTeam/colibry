@@ -1,4 +1,4 @@
-# Sandbox module of Skein.
+# Sandbox module of Colibry.
 # Network-facing and secret-bearing desktop applications are wrapped with
 # nixpak: a bubblewrap sandbox with XDG portal permissions, similar to
 # Flatpak but built natively from Nix packages.
@@ -14,7 +14,7 @@
     # the overlay output in itself forever).
     (final: prev:
       let
-        # Build a nixpak sandbox around a package with Skein's default policy:
+        # Build a nixpak sandbox around a package with Colibry's default policy:
         # no host filesystem access except portals, isolated network namespace
         # except for the applications that genuinely need the network.
         sandboxed = pkg: extraSloth: nixpak.lib.nixpak { inherit lib; pkgs = prev; } {

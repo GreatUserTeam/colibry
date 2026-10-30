@@ -1,4 +1,4 @@
-# Encryption and first-boot provisioning module of Skein.
+# Encryption and first-boot provisioning module of Colibry.
 # Protects data at rest: the system disk is LUKS2 (passphrase = the root
 # password chosen in the installer) with key wiping on shutdown, suspend
 # longer than 72 hours re-locks the disk, and every user home lives in its
@@ -14,43 +14,43 @@
   # Key wiping at shutdown: the volume is suspended before the disks are
   # unmounted, so the encryption keys are dropped from memory and the next
   # boot always asks for the passphrase.
-  systemd.services.skein-key-wipe = {
+  systemd.services.colibry-key-wipe = {
     description = "Suspend the LUKS root volume on shutdown";
     wantedBy = [ "shutdown.target" ];
     before = [ "shutdown.target" "umount.target" ];
     unitConfig.DefaultDependencies = false;
-    unitConfig.ConditionPathExists = "/dev/mapper/skein-root";
+    unitConfig.ConditionPathExists = "/dev/mapper/colibry-root";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.cryptsetup}/bin/cryptsetup luksSuspend skein-root";
+      ExecStart = "${pkgs.cryptsetup}/bin/cryptsetup luksSuspend colibry-root";
     };
   };
 
   # Hibernation guard: the timestamp of the last suspend is written to the
   # ESP; if the system wakes up more than 72 hours later, every logged-in
   # user is terminated, the disk is re-locked and the machine powers off.
-  systemd.services.skein-hibernate-guard-suspend = {
+  systemd.services.colibry-hibernate-guard-suspend = {
     description = "Record the suspend time for the hibernation guard";
     wantedBy = [ "suspend.target" ];
     after = [ "suspend.target" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.coreutils}/bin/date +%%s > /boot/skein-last-suspend";
+      ExecStart = "${pkgs.coreutils}/bin/date +%%s > /boot/colibry-last-suspend";
     };
   };
-  systemd.services.skein-hibernate-guard-resume = {
+  systemd.services.colibry-hibernate-guard-resume = {
     description = "Re-lock the disk after long hibernation";
     wantedBy = [ "suspend.target" ];
     before = [ "suspend.target" ];
     unitConfig.DefaultDependencies = false;
-    unitConfig.ConditionPathExists = "/dev/mapper/skein-root";
+    unitConfig.ConditionPathExists = "/dev/mapper/colibry-root";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.writeShellScript "skein-hibernate-guard" ''
+      ExecStart = "${pkgs.writeShellScript "colibry-hibernate-guard" ''
         set -u
-        STAMP=/boot/skein-last-suspend
+        STAMP=/boot/colibry-last-suspend
         [ -f "$STAMP" ] || exit 0
         NOW=$(${pkgs.coreutils}/bin/date +%s)
         THEN=$(${pkgs.coreutils}/bin/cat "$STAMP")
@@ -65,7 +65,7 @@
                 ${pkgs.systemd}/bin/loginctl terminate-user "$U" 2>/dev/null || true
               done
           ${pkgs.coreutils}/bin/sleep 1
-          ${pkgs.cryptsetup}/bin/cryptsetup luksSuspend skein-root || true
+          ${pkgs.cryptsetup}/bin/cryptsetup luksSuspend colibry-root || true
           ${pkgs.systemd}/bin/systemctl poweroff
         fi
       ''}";
@@ -85,23 +85,23 @@
   };
 
   # Root password: the installer stores the password chosen in the wizard
-  # in /etc/skein/root-password (mode 0600); this one-shot applies it with
+  # in /etc/colibry/root-password (mode 0600); this one-shot applies it with
   # chpasswd and removes the file.
-  systemd.services.skein-root-password = {
+  systemd.services.colibry-root-password = {
     description = "Set the root password chosen in the installer";
     wantedBy = [ "multi-user.target" ];
-    unitConfig.ConditionPathExists = "/etc/skein/root-password";
+    unitConfig.ConditionPathExists = "/etc/colibry/root-password";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.writeShellScript "skein-root-password" ''
+      ExecStart = "${pkgs.writeShellScript "colibry-root-password" ''
         set -u
-        PWFILE=/etc/skein/root-password
+        PWFILE=/etc/colibry/root-password
         PW=$(${pkgs.coreutils}/bin/cat "$PWFILE")
         if printf 'root:%s\n' "$PW" | ${pkgs.shadow}/bin/chpasswd; then
           ${pkgs.coreutils}/bin/rm -f "$PWFILE"
         else
-          ${pkgs.util-linux}/bin/logger -t skein-root-password \
+          ${pkgs.util-linux}/bin/logger -t colibry-root-password \
             "ERROR: could not set the root password"
         fi
       ''}";
@@ -109,29 +109,29 @@
   };
 
   # User accounts: the installer stores one "username<TAB>password" line
-  # per account in /etc/skein/homed-users (mode 0600). This one-shot creates
+  # per account in /etc/colibry/homed-users (mode 0600). This one-shot creates
   # every account with an encrypted homed home, forcing a password change at
   # the first login, and removes the file. If a homed account cannot be
   # created, a classic account with the same password is created instead
   # (with the forced change applied directly), so a login always exists.
-  systemd.services.skein-homed-create = {
-    description = "Create the Skein user accounts with encrypted homes";
+  systemd.services.colibry-homed-create = {
+    description = "Create the Colibry user accounts with encrypted homes";
     wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-homed.service" "skein-root-password.service" ];
-    unitConfig.ConditionPathExists = "/etc/skein/homed-users";
+    after = [ "systemd-homed.service" "colibry-root-password.service" ];
+    unitConfig.ConditionPathExists = "/etc/colibry/homed-users";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
-    serviceConfig.ExecStart = "${pkgs.writeShellScript "skein-homed-create" ''
+    serviceConfig.ExecStart = "${pkgs.writeShellScript "colibry-homed-create" ''
       set -u
-      USERSFILE=/etc/skein/homed-users
+      USERSFILE=/etc/colibry/homed-users
       TAB=$(printf '\t')
 
       while IFS="$TAB" read -r USER PW; do
         [ -n "$USER" ] || continue
         if ! echo "$USER" | ${pkgs.gnugrep}/bin/grep -qE '^[a-z_][a-z0-9_-]{0,31}$'; then
-          ${pkgs.util-linux}/bin/logger -t skein-homed-create \
+          ${pkgs.util-linux}/bin/logger -t colibry-homed-create \
             "skipping invalid user name '$USER'"
           continue
         fi
@@ -165,7 +165,7 @@
           -s ${pkgs.zsh}/bin/zsh "$USER"
         ${pkgs.coreutils}/bin/printf '%s:%s\n' "$USER" "$PW" | ${pkgs.shadow}/bin/chpasswd
         ${pkgs.shadow}/bin/chage -d 0 "$USER"
-        ${pkgs.util-linux}/bin/logger -t skein-homed-create \
+        ${pkgs.util-linux}/bin/logger -t colibry-homed-create \
           "WARNING: homed account creation failed for $USER; created a classic account, home is not encrypted"
       done < "$USERSFILE"
 

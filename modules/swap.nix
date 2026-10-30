@@ -1,4 +1,4 @@
-# Swap module of Skein.
+# Swap module of Colibry.
 # Memory pressure is absorbed by a compressed zram device first, like the
 # compressed memory of other desktop operating systems; a btrfs swap file
 # grows on demand in 2 GiB steps when zram alone is not enough. The swap
@@ -23,8 +23,8 @@
   # Re-activates swap files created by earlier growth rounds at boot (the
   # base /swap/swapfile is activated by the fstab entry from the hardware
   # configuration).
-  systemd.services.skein-swap-activate = {
-    description = "Activate additional Skein swap files";
+  systemd.services.colibry-swap-activate = {
+    description = "Activate additional Colibry swap files";
     wantedBy = [ "local-fs.target" ];
     after = [ "local-fs.target" ];
     serviceConfig.Type = "oneshot";
@@ -44,9 +44,9 @@
   # Growth watchdog: once a minute, when total swap usage stays above 70%,
   # a fresh 2 GiB swap file is created and activated. Growth stops at 8
   # additional files and always leaves at least 4 GiB of filesystem space.
-  systemd.services.skein-swap-grow = {
+  systemd.services.colibry-swap-grow = {
     description = "Grow the btrfs swap files under memory pressure";
-    after = [ "skein-swap-activate.service" ];
+    after = [ "colibry-swap-activate.service" ];
     path = [ pkgs.btrfs-progs pkgs.util-linux pkgs.coreutils pkgs.gnugrep ];
     script = ''
       set -u
@@ -80,7 +80,7 @@
       swapon -p 10 "/swap/swapfile.$IDX" || true
     '';
   };
-  systemd.timers.skein-swap-grow = {
+  systemd.timers.colibry-swap-grow = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "5min";

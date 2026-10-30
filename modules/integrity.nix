@@ -1,4 +1,4 @@
-# File integrity scanner configuration of Skein (AIDE).
+# File integrity scanner configuration of Colibry (AIDE).
 #
 # The integrity service itself (initial database build on first boot, the
 # daily check and the timer) is defined in modules/security.nix; this
@@ -12,7 +12,7 @@
 {
   environment.etc."aide.conf" = lib.mkForce {
     text = ''
-      # Input database for --check; built by skein-aide-init on first boot.
+      # Input database for --check; built by colibry-aide-init on first boot.
       database_in=file:/var/lib/aide/aide.db
       # Output database for --init; promoted over the input database by
       # the initial-build service.

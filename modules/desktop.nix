@@ -1,19 +1,19 @@
-# Desktop module of Skein.
+# Desktop module of Colibry.
 # Session: COSMIC on Wayland. COSMIC is a Rust desktop environment
 # (compositor, dock, panel, applets, settings) that is driven entirely by
 # mouse and touch, and it ships its own file manager, text editor,
 # terminal and store, so the system carries no GNOME or KDE utilities at
-# all. COSMIC is the interim desktop of Skein and gives way to the custom
+# all. COSMIC is the interim desktop of Colibry and gives way to the custom
 # shell of the distribution later.
 { config, pkgs, lib, ... }:
 
 let
-  # The Skein wallpaper is installed into the standard backgrounds
+  # The Colibry wallpaper is installed into the standard backgrounds
   # directory; the path inside the system profile is stable across
   # rebuilds, so references to it never break.
-  skeinWallpaper = pkgs.runCommand "skein-wallpaper" { } ''
-    mkdir -p $out/share/backgrounds/skein
-    cp ${../assets/wallpaper.jpg} $out/share/backgrounds/skein/wallpaper.jpg
+  colibryWallpaper = pkgs.runCommand "colibry-wallpaper" { } ''
+    mkdir -p $out/share/backgrounds/colibry
+    cp ${../assets/wallpaper.jpg} $out/share/backgrounds/colibry/wallpaper.jpg
   '';
 in
 {
@@ -30,17 +30,17 @@ in
   # system; GDM stays disabled so the session starts from the greeter.
   services.displayManager.gdm.enable = false;
 
-  # COSMIC Store duplicates the curated app store of Skein (Nix Software
+  # COSMIC Store duplicates the curated app store of Colibry (Nix Software
   # Center) and is the only COSMIC application excluded from the session.
   environment.cosmic.excludePackages = [ pkgs.cosmic-store ];
 
-  # The Skein wallpaper is installed system-wide.
-  environment.systemPackages = [ skeinWallpaper ];
+  # The Colibry wallpaper is installed system-wide.
+  environment.systemPackages = [ colibryWallpaper ];
 
   # First-boot defaults for every account created after this profile is
   # installed: both systemd-homed and useradd seed a new home directory
   # from /etc/skel, so a file dropped into /etc/skel lands in every new
-  # Skein home exactly once, at creation time.
+  # Colibry home exactly once, at creation time.
 
   # Wallpaper entry of cosmic-bg, read from the per-output key "all".
   # The RON struct below carries exactly the fields cosmic-bg accepts;
@@ -49,7 +49,7 @@ in
   environment.etc."skel/.config/cosmic/com.system76.CosmicBackground/v1/all".text = ''
     (
         output: "all",
-        source: Path("/run/current-system/sw/share/backgrounds/skein/wallpaper.jpg"),
+        source: Path("/run/current-system/sw/share/backgrounds/colibry/wallpaper.jpg"),
         filter_by_theme: false,
         rotation_frequency: 86400,
         filter_method: Lanczos,
@@ -71,7 +71,7 @@ in
   # five idle minutes the session manager is asked to lock, and the
   # compositor answers with its own lock screen. Screen blanking and
   # suspend stay with cosmic-idle; this service owns only the lock.
-  systemd.user.services.skein-idle-lock = {
+  systemd.user.services.colibry-idle-lock = {
     description = "Lock the session after five idle minutes";
     wantedBy = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
@@ -80,7 +80,7 @@ in
       Type = "simple";
       Restart = "on-failure";
       RestartSec = 5;
-      ExecStart = toString (pkgs.writeShellScript "skein-idle-lock" ''
+      ExecStart = toString (pkgs.writeShellScript "colibry-idle-lock" ''
         exec ${pkgs.swayidle}/bin/swayidle -w \
           timeout 300 '${pkgs.systemd}/bin/loginctl lock-session "''${XDG_SESSION_ID}"'
       '');

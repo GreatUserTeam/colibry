@@ -1,7 +1,7 @@
-# Silent UEFI boot image for the Skein installer ISO.
+# Silent UEFI boot image for the Colibry installer ISO.
 #
 # The base ISO module builds its EFI boot image around the upstream GRUB
-# template, which paints a text banner on the screen on every boot. Skein
+# template, which paints a text banner on the screen on every boot. Colibry
 # boots must show nothing between the firmware screen and the Plymouth
 # splash, so this module builds its own minimal FAT boot image around a
 # wordless GRUB configuration and grafts it over the upstream one in the
@@ -37,13 +37,13 @@ let
   # entry), no video mode switch. The only work is locating the ISO9660
   # filesystem through the marker file the base module leaves in the ISO
   # tree and handing over to the kernel.
-  grubCfg = pkgs.writeText "skein-grub.cfg" ''
+  grubCfg = pkgs.writeText "colibry-grub.cfg" ''
     set timeout=0
     set default=0
 
     search --set=root --file /EFI/nixos-installer-image
 
-    menuentry "Skein" --id skein {
+    menuentry "Colibry" --id colibry {
       linux ${kernelImage} ${kernelParams}
       initrd ${initrdImage}
     }
@@ -70,7 +70,7 @@ let
   # configuration uses: iso9660 and fat read the ISO tree and this
   # filesystem, search with search_fs_file resolves the marker file,
   # linux loads the kernel, and normal parses the configuration.
-  efiImg = pkgs.runCommand "skein-efi-image" {
+  efiImg = pkgs.runCommand "colibry-efi-image" {
     nativeBuildInputs = [
       pkgs.mtools
       pkgs.libfaketime

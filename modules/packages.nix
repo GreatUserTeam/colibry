@@ -1,4 +1,4 @@
-# Packages module of Skein.
+# Packages module of Colibry.
 # Ships the base system: drivers, codecs, a Rust-first tool set, and the
 # curated desktop application set. Every application is single-purpose;
 # where one program covers several needs it is preferred over several
@@ -229,13 +229,13 @@ in
     # --- Hardware utilities ---
     usbutils pciutils # "lsusb"/"lspci" for support sessions.
 
-    # --- The Skein distro converter app ---
+    # --- The Colibry distro converter app ---
     convertx
   ];
 
   # The Helium browser arrives through its flake: an overlay exposes
   # pkgs.helium, and its NixOS module installs it system-wide with the
-  # Skein policy set (no telemetry, no built-in password manager, no
+  # Colibry policy set (no telemetry, no built-in password manager, no
   # browser sign-in).
   nixpkgs.overlays = [ helium.overlays.default ];
 

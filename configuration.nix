@@ -1,18 +1,29 @@
-# Main system configuration of the Skein distribution.
-# This file wires together all modules and defines the base system identity.
-# Values that the installer collects in the OOBE wizard are defaults here
-# and are overridden by the generated local.nix.
+# Main system configuration of the Colibry distribution.
+# This file wires together all modules and defines the base system
+# identity. Values that the installer collects in the OOBE wizard are
+# defaults here and are overridden by the generated local.nix.
 { config, pkgs, lib, ... }:
 
 let
   # One-shot boot probe: writes the exact kernel command line, the loaded
-  # DRM modules, the DRM device nodes and every Plymouth/DRM journal line
-  # of the current boot to the serial port. The installer image is
-  # debugged through the serial log, and this probe is the single place
-  # that answers why the graphical boot animation does or does not appear.
-  bootDiagnostics = pkgs.writeShellScript "skein-boot-diagnostics" ''
+  # DRM modules, the DRM device nodes, every Plymouth/DRM journal line
+  # of the current boot and the list of failed units to the serial
+  # port. The installer image is debugged through the serial log, and
+  # this probe is the single place that answers why the graphical boot
+  # animation does or does not appear. A dedicated PATH is exported
+  # because a systemd unit starts with an empty environment: without it
+  # every probe command would be looked up in a PATH that does not
+  # contain them and the probe would report spurious failures.
+  bootDiagnostics = pkgs.writeShellScript "colibry-boot-diagnostics" ''
+    export PATH=${lib.makeBinPath [
+      pkgs.kmod        # lsmod
+      pkgs.util-linux  # lsblk
+      pkgs.coreutils   # cat, ls
+      pkgs.gnugrep     # grep
+      pkgs.systemd     # journalctl, systemctl
+    ]}
     exec > /dev/ttyS0 2>&1
-    echo "=== skein boot diagnostics: begin ==="
+    echo "=== colibry boot diagnostics: begin ==="
     echo "--- kernel command line:"
     cat /proc/cmdline
     echo "--- loaded drm/gpu modules:"
@@ -21,7 +32,9 @@ let
     ls -l /dev/dri 2>&1 || true
     echo "--- plymouth/drm journal lines:"
     journalctl -b -o cat --no-pager | grep -iE 'plymouth|drm|virtio_gpu' | tail -n 40 || true
-    echo "=== skein boot diagnostics: end ==="
+    echo "--- failed units:"
+    systemctl --failed --no-legend --no-pager || true
+    echo "=== colibry boot diagnostics: end ==="
   '';
 in
 {
@@ -32,8 +45,8 @@ in
        ++ lib.optionals (builtins.pathExists ./installed-boot.nix) [ ./installed-boot.nix ]
        ++ lib.optionals (builtins.pathExists ./local.nix) [ ./local.nix ];
 
-  # The distribution identifies itself as "skein".
-  networking.hostName = lib.mkDefault "skein";
+  # The distribution identifies itself as "colibry".
+  networking.hostName = lib.mkDefault "colibry";
 
   # The desktop kernel. linux-zen carries the scheduling and latency
   # patches tuned for interactive desktop workloads (better input and
@@ -53,7 +66,7 @@ in
   boot.initrd.kernelModules = [ "virtio_gpu" "bochs" "vmwgfx" ];
 
   # Firmware, microcode and driver blobs carry unfree licenses (Broadcom,
-  # Intel, Realtek, Apple, NVIDIA, ...). Skein ships them deliberately;
+  # Intel, Realtek, Apple, NVIDIA, ...). Colibry ships them deliberately;
   # everything else stays free-only, so no random proprietary application
   # can enter the system.
   nixpkgs.config.allowUnfreePredicate = pkg:
@@ -74,7 +87,7 @@ in
       auto-optimise-store = true;
       # The nix command and flakes are required by the update manager
       # of the installed system (modules/updates.nix) and by every
-      # flake workflow a Skein user meets on the command line.
+      # flake workflow a Colibry user meets on the command line.
       experimental-features = [ "nix-command" "flakes" ];
     };
     gc = {
@@ -84,12 +97,19 @@ in
     };
   };
 
+  # The Xen guest agent pair is useful only on Xen hypervisor hosts.
+  # Everywhere else - bare metal, QEMU/KVM, VMware - both daemons exit
+  # with an error on every boot and pollute the serial diagnostic log
+  # with failure noise, so the pair is switched off here and any module
+  # that wants it back has to override this decision explicitly.
+  services.xe-guest-utilities.enable = lib.mkForce false;
+
   # The human user account is created on the installed system by the homed
   # provisioning service (modules/encryption.nix) with an encrypted home;
   # it is intentionally not declared here. The password change at first
   # login is enforced by that service as well.
 
-  # Silent boot of every Skein system, installed machines included. The
+  # Silent boot of every Colibry system, installed machines included. The
   # screen belongs to the boot animation and the wizard; the serial port
   # is the diagnostic channel. tty0 is a kernel console purely so the
   # framebuffer text console initializes and the wizard can paint the
@@ -120,7 +140,7 @@ in
   # forwarding is deliberately left off, because /dev/console fans writes
   # out to every registered console, which would put the full journal
   # (and every error in it) on the screen.
-  systemd.services.skein-serial-journal = {
+  systemd.services.colibry-serial-journal = {
     description = "Mirror the boot journal to the serial debug port";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-journald.service" ];
@@ -135,7 +155,7 @@ in
   # after the journal mirror starts and dumps the display-boot facts to
   # the serial port. It exists to make the graphical boot debuggable
   # from the serial log alone.
-  systemd.services.skein-boot-diagnostics = {
+  systemd.services.colibry-boot-diagnostics = {
     description = "Log boot display diagnostics to the serial debug port";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-journald.service" ];
@@ -164,7 +184,7 @@ in
   };
   services.pulseaudio.enable = false; # PipeWire replaces PulseAudio entirely.
 
-  # Skein root filesystems are btrfs (never ZFS); foreign ZFS pools are never
+  # Colibry root filesystems are btrfs (never ZFS); foreign ZFS pools are never
   # force-imported, which protects against accidental pool hijacks.
   boot.zfs.forceImportRoot = false;
 
@@ -177,7 +197,7 @@ in
   };
 
   # The Nix build users of the live/installer profile sit above UID 1000;
-  # user creation is driven by the Skein provisioning service, so the
+  # user creation is driven by the Colibry provisioning service, so the
   # systemd-userdb heuristic warning is acknowledged and silenced.
   services.userdbd.silenceHighSystemUsers = true;
 

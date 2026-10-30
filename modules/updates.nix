@@ -1,6 +1,6 @@
-# Update manager of the Skein system.
+# Update manager of the Colibry system.
 #
-# Skein updates come in two kinds with different rules:
+# Colibry updates come in two kinds with different rules:
 #
 #   * Minor updates refresh the packages of the running system. A daily
 #     timer downloads the lock file of the newest tested input set from
@@ -17,12 +17,12 @@
 #     server - a flake archive whose tip is always the newest release -
 #     and only records that a newer release exists; it never installs
 #     anything. Installing is one explicit confirmation through
-#     "skein-update confirm", it always takes the tip of the major
+#     "colibry-update confirm", it always takes the tip of the major
 #     channel (there is deliberately no version picker), and it ends
 #     with a reboot, because a release line change always ships a new
 #     kernel and core runtime.
 #
-# The installed major revision is recorded in /etc/skein/major-installed;
+# The installed major revision is recorded in /etc/colibry/major-installed;
 # the check compares the channel tip against that file. The pending
 # marker lives in /run and is rebuilt by the periodic check after every
 # boot.
@@ -33,24 +33,24 @@
 { config, pkgs, lib, ... }:
 
 let
-  cfg = config.skein.updates;
-  stateDir = "/run/skein";
+  cfg = config.colibry.updates;
+  stateDir = "/run/colibry";
   pendingFile = "${stateDir}/major-pending";
-  installedFile = "/etc/skein/major-installed";
+  installedFile = "/etc/colibry/major-installed";
 in
 {
-  options.skein.updates = {
+  options.colibry.updates = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
       description = ''
-        Enable the Skein update manager: silent minor updates and the
+        Enable the Colibry update manager: silent minor updates and the
         confirm-then-reboot flow for major updates.
       '';
     };
     flake = lib.mkOption {
       type = lib.types.str;
-      default = "/etc/nixos/skein";
+      default = "/etc/nixos/colibry";
       description = ''
         Flake reference of the installed system. Minor updates switch
         the running system to the lock file served for it.
@@ -58,14 +58,14 @@ in
     };
     systemAttr = lib.mkOption {
       type = lib.types.str;
-      default = "skein";
+      default = "colibry";
       description = "Flake output attribute of the system configuration.";
     };
     server = lib.mkOption {
       type = lib.types.str;
-      default = "https://skein.gusteam.net/update";
+      default = "https://colibry.gusteam.net/update";
       description = ''
-        Base URL of the Skein update server. It serves "minor.lock" (the
+        Base URL of the Colibry update server. It serves "minor.lock" (the
         tested lock file for minor updates) and "major.tar.gz" (the flake
         archive of the newest release).
       '';
@@ -75,7 +75,7 @@ in
       default = "${cfg.server}/major.tar.gz";
       description = ''
         Flake reference of the major channel: a moving pointer whose tip
-        is always the newest Skein release. When null, the major update
+        is always the newest Colibry release. When null, the major update
         flow is inactive.
       '';
     };
@@ -97,15 +97,15 @@ in
     ];
 
     # --- minor updates: silent switch, never a reboot ----------------------
-    systemd.services.skein-update-minor = {
-      description = "Skein minor update (silent switch, no reboot)";
+    systemd.services.colibry-update-minor = {
+      description = "Colibry minor update (silent switch, no reboot)";
       path = [ pkgs.nixos-rebuild pkgs.curl pkgs.coreutils ];
       serviceConfig = {
         Type = "oneshot";
         # Only an installed system has the flake; the live session of the
         # installer image skips this service silently.
         ConditionPathExists = cfg.flake;
-        ExecStart = pkgs.writeShellScript "skein-minor-update" ''
+        ExecStart = pkgs.writeShellScript "colibry-minor-update" ''
           set -euo pipefail
           export NIX_CONFIG="experimental-features = nix-command flakes"
           lock_url=${cfg.server}/minor.lock
@@ -129,7 +129,7 @@ in
       # Success is silent by design; failures land in the journal and the
       # next timer run retries.
     };
-    systemd.timers.skein-update-minor = {
+    systemd.timers.colibry-update-minor = {
       description = "Daily minor update check";
       wantedBy = [ "timers.target" ];
       timerConfig = {
@@ -140,12 +140,12 @@ in
     };
 
     # --- major update check: detect, never install ---------------------------
-    systemd.services.skein-update-major-check = lib.mkIf (cfg.majorFlake != null) {
-      description = "Skein major update check";
+    systemd.services.colibry-update-major-check = lib.mkIf (cfg.majorFlake != null) {
+      description = "Colibry major update check";
       path = [ pkgs.nix pkgs.jq ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "skein-major-check" ''
+        ExecStart = pkgs.writeShellScript "colibry-major-check" ''
           set -euo pipefail
           export NIX_CONFIG="experimental-features = nix-command flakes"
           latest="$(${pkgs.nix}/bin/nix flake metadata --json ${cfg.majorFlake} | ${pkgs.jq}/bin/jq -r '.locked.rev // .locked.narHash')"
@@ -158,7 +158,7 @@ in
         '';
       };
     };
-    systemd.timers.skein-update-major-check = lib.mkIf (cfg.majorFlake != null) {
+    systemd.timers.colibry-update-major-check = lib.mkIf (cfg.majorFlake != null) {
       description = "Periodic major update check";
       wantedBy = [ "timers.target" ];
       timerConfig = {
@@ -169,17 +169,17 @@ in
     };
 
     # --- major update apply: one confirmation, tip of the channel, reboot --
-    systemd.services.skein-update-major-apply = lib.mkIf (cfg.majorFlake != null) {
-      description = "Install the latest Skein major update and reboot";
+    systemd.services.colibry-update-major-apply = lib.mkIf (cfg.majorFlake != null) {
+      description = "Install the latest Colibry major update and reboot";
       path = [ pkgs.nix pkgs.jq pkgs.nixos-rebuild ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "skein-major-apply" ''
+        ExecStart = pkgs.writeShellScript "colibry-major-apply" ''
           set -euo pipefail
           export NIX_CONFIG="experimental-features = nix-command flakes"
           latest="$(${pkgs.nix}/bin/nix flake metadata --json ${cfg.majorFlake} | ${pkgs.jq}/bin/jq -r '.locked.rev // .locked.narHash')"
           ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${cfg.majorFlake}#${cfg.systemAttr}
-          mkdir -p /etc/skein
+          mkdir -p /etc/colibry
           printf '%s\n' "$latest" > ${installedFile}
           rm -f ${pendingFile}
           ${pkgs.systemd}/bin/systemctl reboot
@@ -189,8 +189,8 @@ in
 
     # --- command line front end ----------------------------------------------
     environment.systemPackages = [
-      (pkgs.writeShellScriptBin "skein-update" ''
-        # skein-update: front end of the Skein update manager.
+      (pkgs.writeShellScriptBin "colibry-update" ''
+        # colibry-update: front end of the Colibry update manager.
         #
         #   status   Show the update state: last minor update result and
         #            whether a major update is waiting for confirmation.
@@ -207,12 +207,12 @@ in
         cmd=''${1:-status}
         case "$cmd" in
           status)
-            printf 'minor updates: %s\n' "$(${pkgs.systemd}/bin/systemctl show skein-update-minor.service -p Result --value 2>/dev/null || echo unknown)"
+            printf 'minor updates: %s\n' "$(${pkgs.systemd}/bin/systemctl show colibry-update-minor.service -p Result --value 2>/dev/null || echo unknown)"
             if [ -n "$channel" ]; then
               printf 'major channel: %s\n' "$channel"
               printf 'installed major: %s\n' "$(cat "$installed" 2>/dev/null || echo none)"
               if [ -f "$pending" ]; then
-                printf 'major update available: %s (confirm with: skein-update confirm)\n' "$(cat "$pending")"
+                printf 'major update available: %s (confirm with: colibry-update confirm)\n' "$(cat "$pending")"
               else
                 printf 'major updates: none pending\n'
               fi
@@ -221,17 +221,17 @@ in
             fi
             ;;
           check)
-            [ -n "$channel" ] || { echo "skein-update: no major channel configured" >&2; exit 1; }
-            exec ${pkgs.systemd}/bin/systemctl start skein-update-major-check.service
+            [ -n "$channel" ] || { echo "colibry-update: no major channel configured" >&2; exit 1; }
+            exec ${pkgs.systemd}/bin/systemctl start colibry-update-major-check.service
             ;;
           confirm)
-            [ -n "$channel" ] || { echo "skein-update: no major channel configured" >&2; exit 1; }
-            echo "skein-update: installing the latest major update from $channel"
-            echo "skein-update: the system will reboot when the installation finishes"
-            exec ${pkgs.systemd}/bin/systemctl start skein-update-major-apply.service
+            [ -n "$channel" ] || { echo "colibry-update: no major channel configured" >&2; exit 1; }
+            echo "colibry-update: installing the latest major update from $channel"
+            echo "colibry-update: the system will reboot when the installation finishes"
+            exec ${pkgs.systemd}/bin/systemctl start colibry-update-major-apply.service
             ;;
           *)
-            echo "usage: skein-update [status|check|confirm]" >&2
+            echo "usage: colibry-update [status|check|confirm]" >&2
             exit 2
             ;;
         esac

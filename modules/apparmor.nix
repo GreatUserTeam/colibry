@@ -1,16 +1,16 @@
-# AppArmor module of Skein, tuned for a NixOS base.
+# AppArmor module of Colibry, tuned for a NixOS base.
 #
 # Two Nix-specific problems are solved here:
 #
 #   * Stock AppArmor abstractions describe a Filesystem Hierarchy Standard
 #     host: binaries live under /usr, libraries under /lib, configuration
-#     under /etc. On Skein every program, library and profiled binary
+#     under /etc. On Colibry every program, library and profiled binary
 #     resolves through /nix/store and the /run/current-system profile
 #     link, so a profile written against FHS paths denies perfectly
 #     legitimate access and, worse, any confined process that takes part
 #     in a nix build breaks the sandbox. The abstraction shipped here
 #     grants the read side of the store and the writable state of the
-#     nix daemon, and every Skein profile includes it.
+#     nix daemon, and every Colibry profile includes it.
 #
 #   * Activation of the kernel LSM is delegated to the upstream module:
 #     security.apparmor.enable wires AppArmor into security.lsm and the
@@ -58,7 +58,7 @@ in
   security.apparmor = {
     enable = lib.mkDefault true;
 
-    # Ship the nix-store abstraction so every profile built for Skein can
+    # Ship the nix-store abstraction so every profile built for Colibry can
     # resolve store paths instead of failing on FHS assumptions.
     packages = [ nixStoreAbstraction ];
   };

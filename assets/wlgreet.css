@@ -1,0 +1,33 @@
+/* Colibry greeter stylesheet for wlgreet.
+   Dark background, centered card, single password field. */
+window {
+    background-color: #111116;
+    color: #eeeeee;
+    font-family: "Inter", "Noto Sans", sans-serif;
+}
+
+#prompt {
+    color: #9ecbff;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 8px;
+}
+
+#input {
+    background-color: #2a2a32;
+    color: #eeeeee;
+    border: 1px solid #3a3a44;
+    border-radius: 22px;
+    padding: 12px 24px;
+    font-size: 15px;
+    caret-color: #9ecbff;
+}
+
+#input:focus {
+    border-color: #9ecbff;
+}
+
+#message {
+    color: #ef476f;
+    font-size: 13px;
+}

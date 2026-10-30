@@ -1,4 +1,4 @@
-# Installer image of the Skein distribution.
+# Installer image of the Colibry distribution.
 #
 # This module turns the installed system into the live installer ISO. It
 # pins the ISO identity (volume label, file name, squashfs codec), keeps
@@ -12,7 +12,7 @@
 { config, pkgs, lib, modulesPath, nixpkgs, nixpak, nix-software-center, helium, ... }:
 
 let
-  # The distro flake shipped inside the live system at /etc/skein/flake;
+  # The distro flake shipped inside the live system at /etc/colibry/flake;
   # the installer copies it onto the target and builds the installed
   # system from it. Test disks, build results, VCS data and logs are build
   # artifacts of the development machine and never belong into the image.
@@ -24,7 +24,7 @@ let
             || base == "result"
             || base == ".git"
             || base == ".github"
-            || lib.hasPrefix "skein.log" base
+            || lib.hasPrefix "colibry.log" base
             || lib.hasSuffix ".iso" base
             || lib.hasSuffix ".img" base);
   };
@@ -67,7 +67,7 @@ in
   # The image file name is derived from image.baseName (image.fileName
   # defaults to "baseName.extension"); mkForce overrides the value the
   # upstream ISO module sets for itself.
-  image.baseName = lib.mkForce "skein-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}";
+  image.baseName = lib.mkForce "colibry-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}";
 
   # The exact kernel command line of the live boot. mkForce replaces
   # every other module's kernel parameter list for the installer image,
@@ -88,7 +88,7 @@ in
   ];
 
   isoImage = {
-    volumeID = "SKEIN";
+    volumeID = "COLIBRY";
     squashfsCompression = "zstd -Xcompression-level 19";
     makeEfiBootable = true;
     makeUsbBootable = true;
@@ -103,7 +103,7 @@ in
       PROMPT 0
       TIMEOUT 1
       UI menu.c32
-      MENU TITLE Skein
+      MENU TITLE Colibry
       MENU BACKGROUND
       MENU RESOLUTION 1024 768
       MENU COLOR screen      37;40   #00000000 #00000000 none
@@ -129,7 +129,7 @@ in
       MENU VSHIFT 0
       MENU HSHIFT 0
       MENU WIDTHPAD 0
-      MENU AUTOBOOT Skein
+      MENU AUTOBOOT Colibry
     '';
   };
 
@@ -147,8 +147,8 @@ in
 
   # The wizard offers these lists; they are baked at image build time so
   # the picker never spawns a subprocess and works without any network.
-  environment.etc."skein/locales".text = lib.concatStringsSep "\n" locales + "\n";
-  environment.etc."skein/keymaps".text = lib.concatStringsSep "\n" keymaps + "\n";
+  environment.etc."colibry/locales".text = lib.concatStringsSep "\n" locales + "\n";
+  environment.etc."colibry/keymaps".text = lib.concatStringsSep "\n" keymaps + "\n";
 
   # The installed system evaluates this flake offline on the target; the
   # image store therefore carries the exact source trees the lock file
@@ -164,7 +164,7 @@ in
 
   # The distro flake of the live system; the installer copies it onto the
   # target byte-identically (see scripts/install-to-disk.sh).
-  environment.etc."skein/flake".source = flakeSource;
+  environment.etc."colibry/flake".source = flakeSource;
 
   # The live session is driven by the wizard alone; the manual of the
   # generic installer image is not needed.

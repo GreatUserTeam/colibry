@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Skein ISO builder with store hygiene and build verification.
+# Colibry ISO builder with store hygiene and build verification.
 #
 # A full ISO build writes 15-30 GB of new paths into the Nix store, so this
 # wrapper garbage-collects every store path the fresh image does not
@@ -38,10 +38,11 @@ BUILD_ATTEMPTS=3
 # syntax error only inside the virtual machine, half an hour after the
 # build began; here the same failure takes milliseconds and names the file.
 for script in \
-    scripts/skein-oobe.sh \
-    scripts/skein-oobe-term.sh \
-    scripts/skein-oobe-widgets.sh \
-    scripts/install-to-disk.sh; do
+    scripts/colibry-oobe.sh \
+    scripts/colibry-oobe-term.sh \
+    scripts/colibry-oobe-widgets.sh \
+    scripts/install-to-disk.sh \
+    scripts/install-system.sh; do
   if [ -f "$script" ] && ! bash -n "$script" 2>/dev/null; then
     echo "error: $script does not parse; the file is corrupted - replace it with a fresh copy." >&2
     bash -n "$script" 2>&1 | head -n 3 >&2
@@ -110,7 +111,7 @@ build_iso() {
   # garbage collector root under its final name, so the cleanup below
   # never collects the fresh image.
   for (( attempt = 1; attempt <= BUILD_ATTEMPTS; attempt++ )); do
-    if nix build .#skein-iso --out-link "$ISO_LINK" --print-build-logs; then
+    if nix build .#colibry-iso --out-link "$ISO_LINK" --print-build-logs; then
       break
     fi
     if [ "$attempt" -eq "$BUILD_ATTEMPTS" ]; then
@@ -141,7 +142,7 @@ build_iso() {
 
 # Require the flake entry point so the error names the real problem
 # instead of a deep nix evaluation failure.
-[ -f flake.nix ] || { echo "error: flake.nix not found - run this script from the Skein repository root." >&2; exit 1; }
+[ -f flake.nix ] || { echo "error: flake.nix not found - run this script from the Colibry repository root." >&2; exit 1; }
 command -v nix >/dev/null || { echo "error: nix is not installed or not on PATH." >&2; exit 1; }
 # Pin the flake workflow for every nix invocation below.
 export NIX_CONFIG="experimental-features = nix-command flakes"

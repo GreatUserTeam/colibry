@@ -1,4 +1,4 @@
-# Night light module of Skein.
+# Night light module of Colibry.
 # The screen color temperature follows the sun: warm after sunset, neutral
 # during the day. The user never has to think about it.
 { config, pkgs, lib, ... }:

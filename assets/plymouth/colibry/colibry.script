@@ -1,0 +1,107 @@
+# Colibry boot splash for the Plymouth "script" plugin.
+#
+# The screen stays pure black for the whole boot and shows a single
+# element: the Colibry logo (a white star) centered on the screen.
+# While a disk encryption passphrase is entered, a row of white dots
+# appears centered under the logo. Nothing else is ever drawn:
+#   * the black background covers the framebuffer immediately, so no
+#     console output from earlier boot stages can bleed through;
+#   * no boot-progress callback is registered at all, so progress
+#     updates never change a single pixel;
+#   * no message callback is registered at all, so boot status messages
+#     can never render on the screen.
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+# The logo, resolved against the theme ImageDir and rasterized from
+# logo.svg at theme build time; the sprite is placed at its natural size
+# (256x256).
+logo.image = Image("logo.png");
+logo.sprite = Sprite(logo.image);
+
+# Bullet dot for passphrase entry, drawn as a white glyph image.
+bullet.image = Image.Text("\u2022", 1, 1, 1);
+bullet.sprites = [];
+bullet.count = 0;
+
+# layout() centers the logo on the current framebuffer. It runs at theme
+# start and on every display-mode callback, so a graphics handover or a
+# resolution change re-centers the stage. The logo geometry is stored in
+# globals because the passphrase dialog places its dots relative to it.
+fun layout()
+{
+    screen_w = Window.GetWidth();
+    screen_h = Window.GetHeight();
+
+    logo_w = logo.image.GetWidth();
+    logo_h = logo.image.GetHeight();
+
+    logo.x = screen_w / 2 - logo_w / 2;
+    logo.y = screen_h / 2 - logo_h / 2;
+    logo.sprite.SetPosition(logo.x, logo.y, 10);
+}
+
+layout();
+
+# hide_bullets() fades out the dot row of a previous passphrase dialog;
+# the sprite objects themselves stay allocated, which is harmless for a
+# single boot session.
+fun hide_bullets()
+{
+    for (i = 0; i < bullet.count; i++) {
+        bullet.sprites[i].SetOpacity(0);
+    }
+    bullet.count = 0;
+}
+
+# display_password_callback() fires on every keystroke while a disk
+# encryption passphrase is entered; it redraws a centered row of dots
+# under the logo. The prompt text is deliberately not rendered, so no
+# character ever appears on the boot screen.
+fun display_password_callback(prompt, bullets)
+{
+    hide_bullets();
+
+    if (bullets < 1) return;
+
+    gap = 24;
+    total_w = (bullets - 1) * gap;
+    start_x = Window.GetWidth() / 2 - total_w / 2;
+    y = logo.y + logo.image.GetHeight() + 48;
+
+    for (i = 0; i < bullets; i++) {
+        s = Sprite(bullet.image);
+        s.SetPosition(start_x + i * gap, y, 30);
+        bullet.sprites[i] = s;
+        bullet.count = i + 1;
+    }
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+# display_question_callback() handles the rare interactive questions
+# (for example a keydisk prompt) the same way: the typed characters are
+# drawn as white text under the logo and nothing else changes.
+fun display_question_callback(prompt, entry)
+{
+    hide_bullets();
+
+    if (entry.Length() < 1) return;
+
+    text.image = Image.Text(entry, 1, 1, 1);
+    x = Window.GetWidth() / 2 - text.image.GetWidth() / 2;
+    y = logo.y + logo.image.GetHeight() + 48;
+    text.sprite = Sprite(text.image);
+    text.sprite.SetPosition(x, y, 30);
+    bullet.sprites[0] = text.sprite;
+    bullet.count = 1;
+}
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+
+# display_normal_callback() fires when the display returns to the normal
+# boot view after a dialog; it simply re-centers the stage.
+fun display_normal_callback()
+{
+    layout();
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayFailedFunction(display_normal_callback);
