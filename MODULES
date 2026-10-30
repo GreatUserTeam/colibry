@@ -1,4 +1,4 @@
-[PRODUCT NAME] - MODULES
+Colibry - MODULES
 SPDX-License-Identifier: LicenseRef-ILL-1.0
 
 ILL - Modular Lineage License, version 1.0 (adapted)
@@ -18,12 +18,29 @@ bind recipients of a Distribution. If a Module is attached in
 the future, add it below in the following form:
 
 ----------------------------------------------------------------
-Module 1 - [Name or stable pseudonym]
+Module 1 - GUSTeam
 ----------------------------------------------------------------
-- Author (chain entry):  [reference to NOTICE chain entry]
-- Date of attachment:    [DATE]
-- Scope:                 [specific files or additions]
-- Text:                  [the Supplemental Terms]
+- Author (chain entry):  GUSTeam
+- Date of attachment:    30.10.2026
+- Scope:                 The entire Product. This Module is
+                         informative: it adds no conditions and
+                         grants no rights; it activates the
+                         Module mechanism and anchors future
+                         Modules of GUSTeam.
+- Text:
+
+  1. Acknowledgement. The ILL Files remain governed by the
+     ILL base license (version 1.0, adapted) and by the
+     License Stack as defined in it. This Module does not
+     replace, relicense, restrict or condition any of them.
+
+  2. No additional conditions. This Module imposes no fee,
+     field-of-use, ethical-use or attribution requirement on
+     any use of the Product and grants no Commercial Use
+     rights. It is recorded to activate the Module mechanism
+     of ILL 6 and to serve as the anchor point for
+     any future Module of GUSTeam, which will be appended to
+     this file as a new block referencing this chain entry.
 
 Validity conditions: ILL 6.3 and 6.4 (a Module may only add
 terms; it must not contradict the base License or any previous

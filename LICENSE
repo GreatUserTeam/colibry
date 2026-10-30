@@ -1,5 +1,5 @@
-[PRODUCT NAME]
-Copyright (C) [YEAR] [AUTHOR NAME]. All rights reserved.
+Colibry
+Copyright (C) 30.10.2026 GUSTeam. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -176,7 +176,7 @@ HOW TO APPLY
 2. Identify which files are ILL Files. Recommended per-file
    header:
        SPDX-License-Identifier: ILL-1.0
-       Copyright (C) [YEAR] [AUTHOR NAME]
+       Copyright (C) 30.10.2026 GUSTeam
    and/or a per-component list in the NOTICE file. (If
    your compliance tooling requires an SPDX-listed
    identifier, use LicenseRef-ILL-1.0.)

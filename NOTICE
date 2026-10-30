@@ -1,5 +1,5 @@
 Colibry
-Copyright (C) 26-10-26 GUSTeam. All rights reserved.
+Copyright (C) 30.10.2026 GUSTeam. All rights reserved.
 
 License: ILL - Modular Lineage License, version 1.0 (adapted)
 SPDX-License-Identifier: LicenseRef-ILL-1.0
@@ -21,7 +21,7 @@ additional entries referencing the corrected ones (ILL 4.3).
 Chain entry 1 - Original Author
 ----------------------------------------------------------------
 - Author:        GUSTeam
-- Date/Version:  26-10-26 / 0.0.5
+- Date/Version:  30.10.2026 / 0.1.0 concept
 - Changes:       Initial release of Colibry:
                  A security-first NixOS-based
                  Linux distribution with a graphical
@@ -29,13 +29,13 @@ Chain entry 1 - Original Author
                  Plymouth boot theme, btrfs/LUKS2-based
                  installation flow and a curated desktop
                  application set.
-- Contact:       info@gusteam.net / https://colibry.gusteam.net
+- Contact:       gus@unionium.org / https://colibry.gusteam.net
 
 ----------------------------------------------------------------
 Chain entry N - GUSTeam
 ----------------------------------------------------------------
 - Author:        GUSTeam
-- Date/Version:  26-10-26 / 0.0.5
+- Date/Version:  30.10.2026 / 0.1.0 concept
 - Changes:       Installer bring-up: silent UEFI boot image
                  (iso/efi-image.nix, iso/oobe-files.nix); OOBE wizard
                  split into session/terminal/widget libraries
@@ -44,7 +44,7 @@ Chain entry N - GUSTeam
                  tooling (build.sh, run.sh) with self-describing serial
                  logs; kernel-module packaging fix in modules/packages.nix.
 - Status:        confirmed | unconfirmed (ILL 1.8)
-- Contact:       info@gusteam.net / https://colibry.gusteam.net
+- Contact:       gus@unionium.org / https://colibry.gusteam.net
 
 ================================================================
 2. COMMERCIAL RIGHTSHOLDER (ILL Section 8.2)
@@ -55,7 +55,7 @@ designation is listed below, the Commercial Rightsholder is:
 
     GUSTeam
 
-Contact for Commercial Agreements: info@gusteam.net / https://colibry.gusteam.net
+Contact for Commercial Agreements: gus@unionium.org / https://colibry.gusteam.net
 
 Component-specific designations (if any):
 
@@ -97,10 +97,10 @@ restriction and the fee prohibition - do not apply to them.
   repository root; a Module not listed there does not bind
   recipients of a Distribution (ILL 6.6).
 - Copyleft adjacency (ILL 1.7, 2.2, 2.4, corrective revision
-  F13 of 2026-10-25): interaction of GPL-licensed or other
+  F13 of 30.10.2026): interaction of GPL-licensed or other
   strong-copyleft Third-Party Components with the ILL Files
   solely through documented public APIs, ordinary process
   boundaries or standard system calls does not subject those
   components to ILL and does not restrict their own licenses.
 
-Questions: info@gusteam.net.
+Questions: gus@unionium.org.
